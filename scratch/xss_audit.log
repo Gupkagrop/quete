@@ -1,0 +1,9 @@
+.\game.php:366 - innerHTML template literal with dynamic values: waitText.innerHTML = `<span id="responsible-player-name" style="font-weight: bold; color: #ff8c2d;">${respName}</span> выбирает тему`;
+.\hub.php:110 - Direct unescaped PHP echo: <input type="radio" name="selected_lobby" value="<?php echo $lobby['id']; ?>"
+.\hub.php:115 - Direct unescaped PHP echo: <span class="value"><?php echo $lobby['current_players']; ?>/<?php echo $lobby['max_players']; ?></span>
+.\lobby.php:196 - Direct unescaped PHP echo: <div class="list-header-text"><?php echo count($players); ?> из <?php echo $lobby['max_players']; ?></div>
+.\lobby.php:245 - Direct unescaped PHP echo: <input type="number" name="players" id="settings-players" class="form-input" min="2" max="8" value="<?php echo $lobby['max_players']; ?>" required>
+.\lobby.php:250 - Direct unescaped PHP echo: <input type="number" name="timer" id="settings-timer" class="form-input" min="20" max="120" value="<?php echo $lobby['fake_answer_time']; ?>" required>
+.\solo.php:181 - Direct unescaped PHP echo: Вопрос: <?php echo $currentQuestionNum; ?>/3 | Счёт: <?php echo $score; ?>/3
+.\solo.php:267 - Direct unescaped PHP echo: <div class="final-score">Ваш результат: <?php echo $score; ?> из 3</div>
+.\views\chat.php:50 - innerHTML template literal with dynamic values: div.innerHTML = `<strong>${safeName}:</strong> ${safeMsg}`;

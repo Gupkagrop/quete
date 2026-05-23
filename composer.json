@@ -1,0 +1,13 @@
+{
+    "name": "quete/game",
+    "description": "Куэте - Online Quiz Game",
+    "require": {
+        "php": ">=8.0",
+        "cboden/ratchet": "^0.4.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Quete\\": "src/"
+        }
+    }
+}

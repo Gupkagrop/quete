@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Yanone+Kaffeesatz:wght@400;700;800&display=swap');
+
+/* === ПЕРЕМЕННЫЕ === */
+:root {
+    --input-bg: #fff;
+    --text-dark: #000;
+    --text-light: #fff;
+    --bg-dark: #333B65;
+    --accent-orange: #FF7A00;
+    --pill-dark: #293563;
+}
+
+/* Сообщение об ошибке (сверху формы) */
+.error-msg { color: #ff4d4d; margin-bottom: 20px; text-align: center; font-weight: 700; }
+
+/* === ОСНОВНОЙ КОНТЕЙНЕР === */
+.auth-container { 
+    min-height: calc(100vh - 100px); background: var(--bg-dark); 
+    display: grid; place-items: center; /* Центрирует карточку ровно посередине экрана */
+    padding: 40px 20px; 
+}
+.auth-wrapper { width: 100%; max-width: 550px; }
+.auth-card { 
+    padding: 50px; 
+    position: relative; 
+    /* Возвращен оригинальный бесшовный дизайн без рамок, фона и тени */
+}
+
+/* Возвращена исходная простая стрелочка «Назад» без круглого оформления */
+.auth-back { 
+    position: absolute; top: 20px; left: 20px; font-size: 24px; color: var(--text-light); 
+    text-decoration: none; font-weight: 800; transition: .2s; 
+}
+.auth-back:hover { transform: translateX(-5px); }
+
+/* Заголовок формы */
+.auth-title { font: 900 32px 'Inter', sans-serif; color: var(--text-light); text-align: center; margin-bottom: 40px; }
+
+/* === ПОЛЯ ВВОДА === */
+.auth-form { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
+/* Возвращены исходные поля ввода без темно-синей границы */
+.auth-input { 
+    height: 60px; padding: 0 24px; border: none; border-radius: 8px; 
+    background: var(--input-bg); color: var(--text-dark); outline: none; transition: .2s;
+    font: 700 18px 'Yanone Kaffeesatz', sans-serif; /* Шрифт как на макете */
+}
+.auth-input:focus { box-shadow: 0 0 0 3px rgba(255, 140, 45, .3); }
+.auth-input::placeholder { color: #999; }
+
+/* === КНОПКИ === */
+.auth-btn { 
+    height: 60px; border: none; border-radius: 8px; width: 100%; cursor: pointer; transition: .2s; 
+    background: var(--accent-orange); color: var(--text-dark); text-decoration: none;
+    display: grid; place-items: center; /* Центрируем текст в кнопке */
+    font: 800 24px 'Yanone Kaffeesatz', sans-serif; 
+}
+.auth-btn:hover { transform: scale(1.02); box-shadow: 0 10px 30px rgba(255, 140, 45, .3); }
+
+/* Вторичная кнопка (ссылка снизу) */
+.auth-btn-secondary { text-decoration: underline; }
+.auth-btn-secondary:hover { background: rgba(255, 140, 45, .8); box-shadow: none; }
+
+/* === РАЗДЕЛИТЕЛЬ "ИЛИ" === */
+.auth-divider { display: flex; align-items: center; margin: 30px 0; gap: 15px; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.2); }
+.auth-divider span { color: rgba(255,255,255,.6); font-size: 14px; font-weight: 700; }
+
+/* === АДАПТИВНОСТЬ (Мобильные устройства) === */
+@media (max-width: 768px) { 
+    .auth-card { padding: 40px 20px; }
+    .auth-title { font-size: 24px; margin-bottom: 30px; }
+    /* Уменьшаем высоту полей и кнопок на телефонах */
+    .auth-input, .auth-btn { height: 50px; font-size: 16px; padding: 0 16px; }
+    .auth-back { top: 15px; left: 15px; font-size: 20px; }
+}
+
+@media (max-width: 600px) {
+    .auth-container { padding: 15px 8px; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .auth-card { padding: 25px 12px; width: 100%; }
+    .auth-title { font-size: 22px; margin-top: 15px; margin-bottom: 15px; }
+    .auth-input, .auth-btn { height: 48px; font-size: 16px; }
+    .auth-divider { margin: 15px 0; }
+    .auth-back { top: 10px; left: 10px; font-size: 18px; }
+}
+
+@media (max-height: 650px) {
+    .auth-container { padding: 10px 5px; }
+    .auth-card { padding: 15px 10px; }
+    .auth-title { margin-top: 10px; margin-bottom: 10px; font-size: 20px; }
+    .auth-input, .auth-btn { height: 44px; }
+    .auth-divider { margin: 10px 0; }
+}
+
+/* === RETRO IMAGES === */
+.retro-insert-coin { 
+    display: block; margin: 0 auto 20px; max-width: 200px; width: 100%; height: auto; 
+    image-rendering: pixelated; filter: drop-shadow(0 0 15px rgba(255, 122, 0, 0.4)); 
+    animation: insert-pulse 1.5s infinite alternate;
+}
+@keyframes insert-pulse { 
+    0% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255, 122, 0, 0.3)); } 
+    100% { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(255, 122, 0, 0.7)); } 
+}
+
+@media (max-width: 600px) {
+    .retro-insert-coin { max-width: 150px; }
+}

@@ -1,0 +1,4 @@
+C:\OSPanel\modules\php\PHP_8.1\php.exe c:\OSPanel\domains\quete\pre-alpha0.1.3-antigravity\websocket\server.php
+
+cd c:\OSPanel\domains\quete\pre-alpha0.0.3-antigravity
+composer install
