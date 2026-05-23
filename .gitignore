@@ -1,6 +1,4 @@
-*.md
 *.txt
-!README.md
 vendor/
 .env
 !.env.example
