@@ -1,5 +1,31 @@
 <?php include 'views/header.php'; ?>
 
+<!-- Разметка структурированных данных JSON-LD (Schema.org) для SEO -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Куэте",
+  "url": "https://quete.ru/",
+  "description": "Куэте: онлайн-викторина с ИИ-генерацией вопросов. Сыграй в соло или с друзьями в ламповой ретро-атмосфере!",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All",
+  "genre": "Quiz, Multiplayer Game",
+  "browserRequirements": "Requires HTML5, WebSockets, JavaScript",
+  "featureList": [
+    "Генерация вопросов с помощью ИИ (Groq API / Llama)",
+    "Многопользовательские лобби до 8 человек в реальном времени через WebSockets",
+    "Уникальный игровой процесс: придумывай фейковые ответы и обманывай соперников",
+    "Соло-режим с быстрыми раундами по заданным темам",
+    "Премиальный ретро-стиль интерфейса"
+  ],
+  "author": {
+    "@type": "Organization",
+    "name": "Gupkagrop"
+  }
+}
+</script>
+
 <main>
     <!-- Первая секция -->
     <section class="hero">

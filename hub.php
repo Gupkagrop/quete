@@ -56,6 +56,8 @@ unset($_SESSION['flash_error']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Игровой хаб квиза Куэте. Выберите лобби для мультиплеера или запустите соло-режим игры с ИИ-вопросами.">
+    <link rel="canonical" href="https://quete.ru/hub.php">
     <title>HUB</title>
     <link rel="stylesheet" href="assets/css/game.css">
     <script src="assets/js/websocket-client.js?v=<?php echo time(); ?>"></script>

@@ -41,6 +41,36 @@ if (isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Куэте: онлайн-викторина с ИИ-генерацией вопросов. Сыграй в соло или с друзьями в ламповой ретро-атмосфере!">
+    
+    <!-- Канонический URL для предотвращения дублей -->
+    <?php
+    $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    if ($requestUri === '/index.php' || $requestUri === '') {
+        $requestUri = '/';
+    }
+    $canonicalUrl = 'https://quete.ru' . $requestUri;
+    ?>
+    <link rel="canonical" href="<?php echo htmlspecialchars($canonicalUrl); ?>">
+
+    <!-- Open Graph (VK, Telegram, Facebook) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Куэте - Онлайн квиз с ИИ-вопросами">
+    <meta property="og:description" content="Ламповая онлайн-викторина с генерацией вопросов искусственным интеллектом в реальном времени. Сыграй с друзьями или в соло!">
+    <meta property="og:url" content="<?php echo htmlspecialchars($canonicalUrl); ?>">
+    <meta property="og:image" content="https://quete.ru/assets/img/login_insert_coin.jpeg">
+    <meta property="og:site_name" content="Куэте">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Куэте - Онлайн квиз с ИИ-вопросами">
+    <meta name="twitter:description" content="Ламповая онлайн-викторина с генерацией вопросов искусственным интеллектом в реальном времени. Сыграй с друзьями или в соло!">
+    <meta name="twitter:image" content="https://quete.ru/assets/img/login_insert_coin.jpeg">
+
+    <!-- Место для тегов верификации вебмастеров (раскомментируйте и вставьте ваши ключи) -->
+    <!-- <meta name="google-site-verification" content="ВАШ_КОД_GOOGLE" /> -->
+    <!-- <meta name="yandex-verification" content="ВАШ_КОД_YANDEX" /> -->
+
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <title>Куэте - Онлайн квиз</title>
     <link href="https://fonts.googleapis.com/css2?family=Yanone+Kaffeesatz:wght@400;700&display=swap" rel="stylesheet">

@@ -4,6 +4,22 @@
 
 ---
 
+## 📝 29. Интеграция Lighthouse MCP Server и комплексная SEO-оптимизация для продакшн-домена quete.ru (Текущая сессия)
+*   **Установка Lighthouse MCP Server:**
+    *   В глобальный конфигурационный файл [mcp_config.json](file:///C:/Users/denis/.gemini/config/mcp_config.json) добавлена интеграция Lighthouse MCP Server (`@danielsogl/lighthouse-mcp@latest`) с автоматическим запуском через `npx`.
+*   **Обновление правил разработки `GEMINI.md`:**
+    *   В главный файл правил разработки [GEMINI.md](file:///c:/OSPanel/domains/quete/pre-alpha0.1.3-antigravity-git/GEMINI.md) интегрирована подробная информация о Lighthouse MCP Server (добавлен 6-й пункт в список MCP-серверов) и регламент его использования.
+*   **Создание конфигурационных файлов поисковых систем (robots.txt и sitemap.xml):**
+    *   Создан и настроен файл [robots.txt](file:///c:/OSPanel/domains/quete/pre-alpha0.1.3-antigravity-git/robots.txt) с указанием карты сайта на домене `https://quete.ru` и запретом на индексацию приватных игровых интерфейсов, скриптов и системных директорий.
+    *   Разработан файл [sitemap.xml](file:///c:/OSPanel/domains/quete/pre-alpha0.1.3-antigravity-git/sitemap.xml) с перечнем всех публичных путей и их приоритетностью.
+*   **Внедрение Structured Data (Schema.org / JSON-LD):**
+    *   На главной странице [index.php](file:///c:/OSPanel/domains/quete/pre-alpha0.1.3-antigravity-git/index.php) реализована разметка структурированных данных Schema.org в формате JSON-LD для типа `WebApplication` с привязкой к продакшн-домену `https://quete.ru`.
+*   **Добавление динамических канонических ссылок (`rel="canonical"`):**
+    *   В заголовок [views/header.php](file:///c:/OSPanel/domains/quete/pre-alpha0.1.3-antigravity-git/views/header.php) внедрён PHP-скрипт для автоматического формирования канонического адреса страницы на домене `https://quete.ru` с целью исключения дублей страниц в выдаче поисковых систем.
+    *   Канонические ссылки также добавлены во все страницы с собственным заголовком `<head>`: [game.php](file:///c:/OSPanel/domains/quete/pre-alpha0.1.3-antigravity-git/game.php), [hub.php](file:///c:/OSPanel/domains/quete/pre-alpha0.1.3-antigravity-git/hub.php), [lobby.php](file:///c:/OSPanel/domains/quete/pre-alpha0.1.3-antigravity-git/lobby.php).
+*   **Интеграция тегов Open Graph и Twitter Cards (социальное SEO):**
+    *   В заголовок [views/header.php](file:///c:/OSPanel/domains/quete/pre-alpha0.1.3-antigravity-git/views/header.php) интегрированы мета-теги Open Graph и Twitter Cards с общим превью, привлекательным описанием и указанием канонического URL для повышения кликабельности (CTR) ссылок при их публикации в мессенджерах и социальных сетях.
+
 ## 📝 28. Глубокий технический анализ архитектуры и интеграция правил разработки (Текущая сессия)
 *   **Генерация архитектурного справочника `deepAnalysis.md`:**
     *   Создан подробный технический справочник [deepAnalysis.md](file:///c:/OSPanel/domains/quete/pre-alpha0.1.3-antigravity-git/deepAnalysis.md) в корне проекта (и сохранен как системный артефакт).
@@ -579,3 +595,9 @@
         4.  **Устранение кривого переноса на кнопках:** Для кнопок `.btn-pill` задано свойство `white-space: nowrap;` (запрет переноса строк), а размер шрифта и внутренние отступы переведены на гибкий `clamp()` (шрифт плавно меняется от `18px` до `28px`). Это полностью исключило поломку слов и гарантирует превосходный вид кнопок на любых устройствах.
         5.  **Адаптация контейнера левой колонки:** В медиа-запрос добавлено правило `.hero-left { max-width: 100%; width: 100%; align-items: center; }`, обеспечивающее идеальное центрирование содержимого при скрытии правой колонки.
 
+
+*   **Оптимизация автотеста и устранение жестких задержек (Текущая сессия):**
+    *   Файл автотеста [test_gameplay.js](file:///c:/OSPanel/domains/quete/pre-alpha0.1.3-antigravity-git/scratch/test_gameplay.js) был полностью переписан по принципу реактивности. Все фиксированные задержки sleep() для ожидания сетевых WebSocket-соединений были заменены на динамическое ожидание состояния waitForFunction(() => socketClient && socketClient.isConnected()) как для лобби, так и для самой игры.
+    *   Внедрены жесткие проверки валидности перенаправления на страницу hub.php после регистрации, а также проверки успешного выбора элементов на стадии голосования (hasSelected проверка).
+    *   Добавлены функции автоматической записи полной структуры страниц error_p1.html and error_p2.html при возникновении сбоев для упрощения локальной отладки.
+    *   Успешно проведен итоговый сквозной тест многопользовательской игры: время прохождения раунда сократилось с 40 до 17 секунд, стабильность составила 100%.

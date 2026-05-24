@@ -1056,7 +1056,7 @@ $apiKeyExists = defined('GROQ_API_KEY') && !empty(GROQ_API_KEY);
                 <h3>Внимание! GROQ API ключ отсутствует или пуст</h3>
                 <p>ИИ запущен в режиме автоматической симуляции (используются заглушки core/ai_handler.php). Для проверки реальных сетевых запросов настройте подключение:</p>
                 <ol class="warning-steps">
-                    <li>Перейдите в панель разработчика: <a href="https://console.groq.com/keys" target="_blank" style="color: var(--accent-orange); font-weight:700;">https://console.groq.com/keys</a></li>
+                    <li>Перейдите в панель разработчика: <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color: var(--accent-orange); font-weight:700;">https://console.groq.com/keys</a></li>
                     <li>Сгенерируйте секретный ключ (API Key)</li>
                     <li>Создайте файл <code>.env</code> в корне проекта и пропишите туда: <br><code>GROQ_API_KEY=ваш_секретный_ключ_gsk_xxx</code></li>
                     <li>Или добавьте строку в <code>config.php</code>: <br><code>define('GROQ_API_KEY', 'gsk_xxxx');</code></li>

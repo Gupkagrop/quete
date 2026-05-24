@@ -160,6 +160,8 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Лобби ожидания игры Куэте. Собирайтесь с друзьями, настраивайте правила и готовьтесь к началу викторины!">
+    <link rel="canonical" href="https://quete.ru/lobby.php">
     <title>Лобби</title>
     <link rel="stylesheet" href="assets/css/game.css">
     <script src="assets/js/websocket-client.js?v=<?php echo time(); ?>"></script>

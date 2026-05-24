@@ -48,6 +48,8 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Игровой экран квиза Куэте. Отвечай на уникальные вопросы ИИ и обхитри соперников своими фейковыми ответами!">
+    <link rel="canonical" href="https://quete.ru/game.php">
     <title>Куэте - Игра</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/game.css">
@@ -434,8 +436,8 @@ function updateGameState() {
                 displayQuestion(data.currentQuestion, 'question-text-vote');
                 if (!answersCache) {
                     answersCache = cacheAndFilterAnswers(data);
+                    renderAnswersFromCache();
                 }
-                renderAnswersFromCache();
             } else if (newState === 'results') {
                 switchState('state-results', `Итоги раунда ${data.currentRound}/${ROUNDS_COUNT}`);
                 if (!resultsStartTime) {

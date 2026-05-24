@@ -34,7 +34,7 @@ include 'views/header.php';
                 <div class="auth-checkbox-group" style="margin-top: 10px; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 10px; text-align: left;">
                     <input type="checkbox" id="legal_consent" name="legal_consent" required style="margin-top: 4px;">
                     <label for="legal_consent" style="font-size: 12px; color: rgba(255,255,255,0.8); line-height: 1.4;">
-                        Я подтверждаю, что мне исполнилось 18 лет, даю согласие на обработку персональных данных и принимаю условия <a href="terms.php" target="_blank" style="color: var(--accent-orange); text-decoration: underline;">Пользовательского соглашения</a> и <a href="privacy.php" target="_blank" style="color: var(--accent-orange); text-decoration: underline;">Политики конфиденциальности</a>.
+                        Я подтверждаю, что мне исполнилось 18 лет, даю согласие на обработку персональных данных и принимаю условия <a href="terms.php" target="_blank" rel="noopener" style="color: var(--accent-orange); text-decoration: underline;">Пользовательского соглашения</a> и <a href="privacy.php" target="_blank" rel="noopener" style="color: var(--accent-orange); text-decoration: underline;">Политики конфиденциальности</a>.
                     </label>
                 </div>                
                 <button type="submit" class="auth-btn">Зарегистрироваться</button>
