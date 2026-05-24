@@ -119,5 +119,22 @@ if (!headers_sent() && php_sapi_name() !== 'cli') {
     header("Content-Security-Policy: " . implode('; ', $cspRules) . ';');
 }
 
+/**
+ * Генерирует атрибуты Subresource Integrity (SRI) для локального файла
+ * @param string $relativePath Путь к файлу относительно корня проекта
+ * @return string Строка с атрибутами integrity и crossorigin
+ */
+function get_sri_attrs($relativePath)
+{
+    $filePath = __DIR__ . '/' . ltrim($relativePath, '/');
+    $cleanPath = explode('?', $filePath)[0];
+    if (file_exists($cleanPath)) {
+        $hash = base64_encode(hash_file('sha256', $cleanPath, true));
+        return ' integrity="sha256-' . $hash . '" crossorigin="anonymous"';
+    }
+    return '';
+}
+
+
 
 

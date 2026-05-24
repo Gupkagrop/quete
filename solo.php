@@ -119,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 include 'views/header.php';
 ?>
-<link rel="stylesheet" href="assets/css/game.css">
+<link rel="stylesheet" href="assets/css/game.css"<?php echo get_sri_attrs('assets/css/game.css'); ?>>
 
 <script nonce="<?php echo CSP_NONCE; ?>">
 function showSoloGeneratingMessage() {

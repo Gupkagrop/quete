@@ -83,6 +83,7 @@ files_to_upload = [
     "solo.php",
     "admin.php",
     "test_ai.php",
+    "test_ai_web.php",
     "views/header.php",
     "views/chat.php",
     "views/user_stats.php",
@@ -97,7 +98,24 @@ files_to_upload = [
     "assets/css/style.css",
     "assets/css/auth.css",
     "assets/css/game.css",
-    "scratch/deploy_images.py"
+    "robots.txt",
+    "sitemap.xml",
+    "README.md",
+    "GENERAL.md",
+    "GEMINI.md",
+    "DEPLOYMENT_GUIDE_AGENT.md",
+    "USER_INSTR.md",
+    "deepAnalysis.md",
+    "scratch/deploy_images.py",
+    "scratch/deploy_updated_code.py",
+    "scratch/compare_files.py",
+    "scratch/convert_to_webp.php",
+    "scratch/convert_to_webp.py",
+    "scratch/debug_puppeteer.js",
+    "scratch/deploy_nginx.py",
+    "scratch/fix_completed_work.py",
+    "scratch/quete_nginx.conf",
+    "scratch/test_gameplay.js"
 ]
 
 print("--- 1. Uploading updated files to VPS ---")

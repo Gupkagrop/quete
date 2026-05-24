@@ -55,9 +55,9 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&family=Poppins:wght@600;700;800;900&family=Yanone+Kaffeesatz:wght@400;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&family=Poppins:wght@600;700;800;900&family=Yanone+Kaffeesatz:wght@400;700;800&display=swap" rel="stylesheet"></noscript>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/game.css">
-    <script src="assets/js/websocket-client.js?v=<?php echo time(); ?>"></script>
+    <link rel="stylesheet" href="assets/css/style.css"<?php echo get_sri_attrs('assets/css/style.css'); ?>>
+    <link rel="stylesheet" href="assets/css/game.css"<?php echo get_sri_attrs('assets/css/game.css'); ?>>
+    <script src="assets/js/websocket-client.js?v=<?php echo time(); ?>"<?php echo get_sri_attrs('assets/js/websocket-client.js'); ?>></script>
     <style nonce="<?php echo CSP_NONCE; ?>">
         .timer-warning { color: #ff4444; }
         .btn-disabled { opacity: 0.5; cursor: not-allowed !important; background-color: #999; }
