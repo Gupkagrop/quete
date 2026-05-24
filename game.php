@@ -53,7 +53,10 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
     <title>Куэте - Игра</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&family=Poppins:wght@600;700;800;900&family=Yanone+Kaffeesatz:wght@400;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" id="gfonts-preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&family=Poppins:wght@600;700;800;900&family=Yanone+Kaffeesatz:wght@400;700;800&display=swap" as="style">
+    <script nonce="<?php echo CSP_NONCE; ?>">
+        document.getElementById('gfonts-preload').rel = 'stylesheet';
+    </script>
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&family=Poppins:wght@600;700;800;900&family=Yanone+Kaffeesatz:wght@400;700;800&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="assets/css/style.css"<?php echo get_sri_attrs('assets/css/style.css'); ?>>
     <link rel="stylesheet" href="assets/css/game.css"<?php echo get_sri_attrs('assets/css/game.css'); ?>>
