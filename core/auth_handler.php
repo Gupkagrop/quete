@@ -36,8 +36,16 @@ if ($action === 'register') {
     $password = $_POST['password'] ?? '';
     $passwordConfirm = $_POST['password_confirm'] ?? '';
 
+    if (empty($_POST['legal_consent'])) {
+        redirectWithError('register.php', 'Необходимо принять Пользовательское соглашение и Политику конфиденциальности.');
+    }
+
     if ($username === '' || $email === '' || $password === '' || $passwordConfirm === '') {
         redirectWithError('register.php', 'Пожалуйста, заполните все поля.');
+    }
+
+    if (moderateChatMessage($username) !== $username) {
+        redirectWithError('register.php', 'Имя пользователя содержит недопустимые/нецензурные слова.');
     }
 
     if (mb_strlen($username) < 3 || mb_strlen($username) > 50) {

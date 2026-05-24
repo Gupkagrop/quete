@@ -10,9 +10,9 @@ hostname = "155.212.165.20"
 port = 22
 username = "root"
 password = "_XrYd2K_GNgv2uK"
-key_path = r"c:\OSPanel\domains\quete\pre-alpha0.1.3-antigravity\scratch\id_quete"
+key_path = r"c:\OSPanel\domains\quete\pre-alpha0.1.3-antigravity-git\scratch\id_quete"
 
-local_root = r"c:\OSPanel\domains\quete\pre-alpha0.1.3-antigravity"
+local_root = r"c:\OSPanel\domains\quete\pre-alpha0.1.3-antigravity-git"
 remote_root = "/var/www/quete"
 
 ssh = paramiko.SSHClient()
@@ -80,7 +80,7 @@ remote_mkdir_p(remote_img_dir)
 
 # List local images
 local_files = [f for f in os.listdir(local_img_dir) if os.path.isfile(os.path.join(local_img_dir, f))]
-img_extensions = ['.png', '.jpg', '.jpeg', '.gif', '.ico']
+img_extensions = ['.png', '.jpg', '.jpeg', '.gif', '.ico', '.webp']
 
 uploaded_count = 0
 for file in local_files:

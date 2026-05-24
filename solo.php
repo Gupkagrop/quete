@@ -121,7 +121,7 @@ include 'views/header.php';
 ?>
 <link rel="stylesheet" href="assets/css/game.css">
 
-<script>
+<script nonce="<?php echo CSP_NONCE; ?>">
 function showSoloGeneratingMessage() {
     // Немедленно отключаем кнопки для предотвращения двойных кликов
     const btns = document.querySelectorAll('.btn-game, .card-btn');
@@ -286,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 </div>
 
-<style>
+<style nonce="<?php echo CSP_NONCE; ?>">
 /* Дополнительные стили для соло-режима, не ломающие общую сетку */
 .main-content { padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; }
 .question-section { margin-bottom: 30px; text-align: center; width: 100%; max-width: 600px; }

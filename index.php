@@ -1,7 +1,7 @@
 <?php include 'views/header.php'; ?>
 
 <!-- Разметка структурированных данных JSON-LD (Schema.org) для SEO -->
-<script type="application/ld+json">
+<script type="application/ld+json" nonce="<?php echo CSP_NONCE; ?>">
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
@@ -50,7 +50,7 @@
                 </div>
             </div>
             <!-- Джойстик -->
-            <img src="assets/img/joystick.png" alt="Joystick" class="joystick-icon">
+            <img src="assets/img/joystick.webp" alt="Joystick" class="joystick-icon" width="260" height="260">
         </div>
     </section>
 
@@ -63,17 +63,17 @@
         </div>
 
         <div class="slider-area">
-            <div class="arrow-btn prev">←</div>
+            <div class="arrow-btn prev" role="button" tabindex="0" aria-label="Предыдущий слайд">←</div>
             <div class="carousel">
-                <img src="assets/img/slide1.png" alt="Slide 1" class="slide">
-                <img src="assets/img/slide2.png" alt="Slide 2" class="slide">
-                <img src="assets/img/slide3.png" alt="Slide 3" class="slide">
-                <img src="assets/img/slide4.png" alt="Slide 4" class="slide">
-                <img src="assets/img/slide5.png" alt="Slide 5" class="slide">
+                <img src="assets/img/slide1.webp" alt="Slide 1" class="slide active" width="400" height="250" fetchpriority="high">
+                <img src="assets/img/slide2.webp" alt="Slide 2" class="slide right" width="400" height="250">
+                <img src="assets/img/slide3.webp" alt="Slide 3" class="slide" width="400" height="250">
+                <img src="assets/img/slide4.webp" alt="Slide 4" class="slide" width="400" height="250">
+                <img src="assets/img/slide5.webp" alt="Slide 5" class="slide left" width="400" height="250">
             </div>
-            <div class="arrow-btn next">→</div>
+            <div class="arrow-btn next" role="button" tabindex="0" aria-label="Следующий слайд">→</div>
         </div>
-        <script>
+        <script nonce="<?php echo CSP_NONCE; ?>">
             document.addEventListener('DOMContentLoaded', function() {
                 const slides = document.querySelectorAll('.carousel .slide');
                 let current = 0;
@@ -94,8 +94,20 @@
                 function next() { current = (current + 1) % slides.length; show(current); }
                 function prev() { current = (current - 1 + slides.length) % slides.length; show(current); }
 
-                document.querySelector('.arrow-btn.next').addEventListener('click', next);
-                document.querySelector('.arrow-btn.prev').addEventListener('click', prev);
+                const nextBtn = document.querySelector('.arrow-btn.next');
+                const prevBtn = document.querySelector('.arrow-btn.prev');
+
+                nextBtn.addEventListener('click', next);
+                prevBtn.addEventListener('click', prev);
+
+                const handleKey = (action) => (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        action();
+                    }
+                };
+                nextBtn.addEventListener('keydown', handleKey(next));
+                prevBtn.addEventListener('keydown', handleKey(prev));
 
                 show(current);
                 setInterval(next, 10000);

@@ -74,3 +74,50 @@ define('WS_CLIENT_HOST', getenv('WS_CLIENT_HOST') ?: '127.0.0.1'); // Хост �
 define('WS_CLIENT_PORT', getenv('WS_CLIENT_PORT') !== false ? (int)getenv('WS_CLIENT_PORT') : 8888); // Порт для подключения клиента (в прод. через Nginx = 8888)
 
 
+// === ЗАГОЛОВКИ БЕЗОПАСНОСТИ (HTTP SECURITY HEADERS) ===
+if (!headers_sent() && php_sapi_name() !== 'cli') {
+    // Включаем HSTS только при наличии HTTPS
+    $isHttps = (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) === 'on') || 
+               (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https');
+               
+    if ($isHttps) {
+        header("Strict-Transport-Security: max-age=63072000; includeSubDomains; preload");
+    }
+    
+    header("X-Content-Type-Options: nosniff");
+    header("X-Frame-Options: DENY");
+    header("Referrer-Policy: strict-origin-when-cross-origin");
+    
+    // Генерация криптографического Nonce для безопасного выполнения встроенного JS
+    if (!defined('CSP_NONCE')) {
+        define('CSP_NONCE', base64_encode(random_bytes(16)));
+    }
+    
+    // Динамический Content-Security-Policy (CSP) для совместимости локальной и боевой среды
+    $wsClientHost = getenv('WS_CLIENT_HOST') ?: '127.0.0.1';
+    $wsClientPort = getenv('WS_CLIENT_PORT') !== false ? (int)getenv('WS_CLIENT_PORT') : 8888;
+    $wsScheme = $isHttps ? 'wss' : 'ws';
+    
+    // Для локальной отладки разрешаем также подключение к localhost/127.0.0.1
+    $connectCsp = "connect-src 'self' {$wsScheme}://{$wsClientHost}:{$wsClientPort}";
+    if (!$isHttps) {
+        $connectCsp .= " ws://localhost:{$wsClientPort} ws://127.0.0.1:{$wsClientPort}";
+    }
+    
+    $cspRules = [
+        "default-src 'none'",
+        "script-src 'self' 'nonce-" . CSP_NONCE . "'",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com 'nonce-" . CSP_NONCE . "'",
+        "font-src 'self' data: https://fonts.gstatic.com",
+        $connectCsp,
+        "img-src 'self' data:",
+        "frame-ancestors 'none'",
+        "base-uri 'self'",
+        "form-action 'self'"
+    ];
+    
+    header("Content-Security-Policy: " . implode('; ', $cspRules) . ';');
+}
+
+
+

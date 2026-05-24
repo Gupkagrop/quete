@@ -29,7 +29,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>403 Доступ запрещен | Стенд Тестирования ИИ</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-        <style>
+        <style nonce="<?php echo CSP_NONCE; ?>">
             body {
                 background-color: #1A1F3B;
                 color: #FFFFFF;
@@ -393,7 +393,7 @@ $apiKeyExists = defined('GROQ_API_KEY') && !empty(GROQ_API_KEY);
     <title>🧪 Стенд Тестирования ИИ | Куэте</title>
     <!-- Подключаем фирменный ретро-шрифт Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
+    <style nonce="<?php echo CSP_NONCE; ?>">
         /* === ПЕРЕМЕННЫЕ ЦВЕТОВ (Куэте - упрощенная плоская ретро-тема) === */
         :root {
             --bg-dark: #333B65;          /* Основной темно-синий фон */
@@ -1403,7 +1403,7 @@ $apiKeyExists = defined('GROQ_API_KEY') && !empty(GROQ_API_KEY);
     </div>
 
     <!-- === ИНТЕРАКТИВНАЯ КЛИЕНТСКАЯ ЧАСТЬ (JS) === -->
-    <script>
+    <script nonce="<?php echo CSP_NONCE; ?>">
         // Глобальные переменные данных вопроса
         let currentQuestionData = null;
 

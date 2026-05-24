@@ -35,7 +35,7 @@ $leaderboard = $stmt->fetchAll();
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCsrfToken()); ?>">
             </form>
             <button class="btn-game" onclick="handleLeaveLobby()">Выйти из лобби</button>
-            <script>
+            <script nonce="<?php echo CSP_NONCE; ?>">
             function handleLeaveLobby() {
                 if (typeof IS_HOST !== 'undefined' && IS_HOST && typeof socketClient !== 'undefined' && socketClient && socketClient.isConnected()) {
                     socketClient.sendAction('lobby_deleted');
@@ -56,7 +56,7 @@ $leaderboard = $stmt->fetchAll();
         <?php endif; ?>
     </div>
 </div>
-<script>
+<script nonce="<?php echo CSP_NONCE; ?>">
 function toggleStatsPopup() {
     const overlay = document.getElementById('stats-overlay');
     if (overlay) {

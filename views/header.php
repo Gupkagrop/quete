@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../config.php';
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -73,8 +75,17 @@ if (isset($_SESSION['user_id'])) {
 
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <title>Куэте - Онлайн квиз</title>
-    <link href="https://fonts.googleapis.com/css2?family=Yanone+Kaffeesatz:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&family=Poppins:wght@600;700;800;900&family=Yanone+Kaffeesatz:wght@400;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&family=Poppins:wght@600;700;800;900&family=Yanone+Kaffeesatz:wght@400;700;800&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="assets/css/style.css">
+    <?php
+    $currentPage = basename($_SERVER['PHP_SELF']);
+    if (in_array($currentPage, ['login.php', 'register.php'])) {
+        echo '    <link rel="stylesheet" href="assets/css/auth.css">' . PHP_EOL;
+    }
+    ?>
 </head>
 <body>
     <header class="header-wrapper">

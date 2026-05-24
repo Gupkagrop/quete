@@ -290,7 +290,7 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
     </div>
 </div>
 
-<script>
+<script nonce="<?php echo CSP_NONCE; ?>">
 const LOBBY_ID = <?php echo $lobbyId; ?>;
 const USER_ID = <?php echo $_SESSION['user_id']; ?>;
 const IS_HOST = <?php echo $isHost ? 'true' : 'false'; ?>;

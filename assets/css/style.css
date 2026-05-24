@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&display=swap');
 
 /* === ПЕРЕМЕННЫЕ ЦВЕТОВ === */
 :root {
@@ -96,7 +95,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff
 }
 .quiz-card-decor .q-text { font: 800 14px 'Inter', sans-serif; margin-bottom: 15px; text-align: right; }
 .quiz-card-decor .a-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font: 700 12px 'Inter', sans-serif; }
-.joystick-icon { width: 260px; position: absolute; bottom: 20px; right: 180px; z-index: 2; }
+.joystick-icon { width: 260px; height: auto; aspect-ratio: 1 / 1; position: absolute; top: 270px; right: 180px; z-index: 2; }
 
 /* === ОРАНЖЕВАЯ СЕКЦИЯ С ФИЧАМИ === */
 .features-section { background: var(--section-orange); padding: 80px 40px 120px; }
@@ -110,7 +109,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff
 /* === СЛАЙДЕР === */
 .slider-area { display: flex; align-items: center; justify-content: center; gap: 40px; }
 .carousel { position: relative; width: 900px; height: 400px; }
-.slide { position: absolute; top: 50%; transform: translateY(-50%); max-width: 400px; transition: .5s; opacity: 0; }
+.slide { position: absolute; top: 50%; transform: translateY(-50%); max-width: 400px; height: auto; aspect-ratio: 8 / 5; transition: .5s; opacity: 0; }
 .slide.active { left: 50%; transform: translate(-50%, -50%) scale(1.1); opacity: 1; z-index: 2; }
 .slide.left { left: 10%; transform: translate(-50%, -50%) scale(0.8); opacity: .3; z-index: 1; }
 .slide.right { left: 90%; transform: translate(-50%, -50%) scale(0.8); opacity: .3; z-index: 1; }
@@ -244,7 +243,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff
     .quiz-card-decor .q-text { font-size: 18px; margin-bottom: 20px; }
     .quiz-card-decor .a-grid { font-size: 16px; gap: 15px; }
     
-    .joystick-icon { width: 350px; right: 250px; bottom: 40px; }
+    .joystick-icon { width: 350px; height: auto; aspect-ratio: 1 / 1; position: absolute; top: 310px; right: 250px; z-index: 2; }
     
     .features-grid { max-width: 1800px; gap: 40px; }
     .feature-item { font-size: 26px; padding: 60px 40px; min-height: 220px; border-radius: 30px; }
@@ -253,4 +252,16 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff
     .carousel { width: 1300px; height: 500px; }
     .slide { max-width: 550px; }
     .arrow-btn { font-size: 100px; }
+}
+
+/* === ACCESSIBILITY FOCUS INDICATORS === */
+.logo-box:focus-visible,
+.btn-pill:focus-visible,
+.arrow-btn:focus-visible,
+.feature-item:focus-visible,
+.footer-logo:focus-visible,
+.footer-icon:focus-visible,
+.footer-legal a:focus-visible {
+    outline: 4px solid var(--accent-orange) !important;
+    outline-offset: 4px;
 }

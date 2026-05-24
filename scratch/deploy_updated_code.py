@@ -11,9 +11,9 @@ hostname = "155.212.165.20"
 port = 22
 username = "root"
 password = "_XrYd2K_GNgv2uK"
-key_path = r"c:\OSPanel\domains\quete\pre-alpha0.1.3-antigravity\scratch\id_quete"
+key_path = r"c:\OSPanel\domains\quete\pre-alpha0.1.3-antigravity-git\scratch\id_quete"
 
-local_root = r"c:\OSPanel\domains\quete\pre-alpha0.1.3-antigravity"
+local_root = r"c:\OSPanel\domains\quete\pre-alpha0.1.3-antigravity-git"
 remote_root = "/var/www/quete"
 
 ssh = paramiko.SSHClient()
@@ -76,25 +76,28 @@ def remote_mkdir_p(remote_directory):
 # (Excluding core/ai_handler.php in accordance with the rule to avoid modifying core/ai_handler.php unless requested)
 files_to_upload = [
     "COMPLETED_WORK.md",
-    "GENERAL.md",
-    "config.php",
-    "core/db.php",
-    "core/ai_handler.php",
-    "solo.php",
-    "lobby.php",
+    "index.php",
     "game.php",
+    "register.php",
+    "login.php",
+    "solo.php",
+    "admin.php",
     "test_ai.php",
+    "views/header.php",
+    "views/chat.php",
     "views/user_stats.php",
-    "ajax/get_lobby_update.php",
-    "ajax/award_points.php",
-    "ajax/finalize_round.php",
-    "ajax/activate_next.php",
-    "ajax/select_topic.php",
-    "ajax/game_state_update.php",
-    "assets/css/game.css",
-    "assets/css/auth.css",
+    "views/footer.php",
+    "core/auth_handler.php",
+    "core/db.php",
+    "hub.php",
+    "lobby.php",
+    ".htaccess",
+    ".user.ini",
+    "config.php",
     "assets/css/style.css",
-    "assets/js/websocket-client.js"
+    "assets/css/auth.css",
+    "assets/css/game.css",
+    "scratch/deploy_images.py"
 ]
 
 print("--- 1. Uploading updated files to VPS ---")

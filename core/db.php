@@ -129,7 +129,7 @@ function createLobby($hostId, $name, $password, $maxPlayers, $fakeTime)
     $stmt = $pdo->prepare('INSERT INTO lobbies (host_id, lobby_name, password, max_players, fake_answer_time, responsible) VALUES (:hid, :name, :pass, :max, :time, :resp)');
     $stmt->execute([
         'hid' => $hostId,
-        'name' => strip_tags(trim($name)),
+        'name' => moderateChatMessage(strip_tags(trim($name))),
         'pass' => $password ?: null,
         'max' => $maxPlayers,
         'time' => $fakeTime,
@@ -384,7 +384,7 @@ function updateLobby($lobbyId, $name, $password, $maxPlayers, $fakeTime)
     $stmt = $pdo->prepare('UPDATE lobbies SET lobby_name = :name, password = :pass, max_players = :max, fake_answer_time = :time WHERE id = :id');
     $stmt->execute([
         'id' => $lobbyId,
-        'name' => strip_tags(trim($name)),
+        'name' => moderateChatMessage(strip_tags(trim($name))),
         'pass' => $password ?: null,
         'max' => $maxPlayers,
         'time' => $fakeTime,
@@ -872,10 +872,16 @@ function moderateChatMessage($message)
         '[упс!]'
     ];
 
-    // Выполняем модерацию по паттернам
+    // Выполняем модерацию по паттернам: заменяем две последние буквы на звёздочки
     foreach ($badPatterns as $pattern) {
-        $message = preg_replace_callback($pattern, function($matches) use ($replacements) {
-            return $replacements[array_rand($replacements)];
+        $message = preg_replace_callback($pattern, function($matches) {
+            $word = $matches[0];
+            $length = mb_strlen($word, 'UTF-8');
+            if ($length <= 2) {
+                return str_repeat('*', $length);
+            } else {
+                return mb_substr($word, 0, $length - 2, 'UTF-8') . '**';
+            }
         }, $message);
     }
 

@@ -195,7 +195,7 @@ unset($_SESSION['flash_error']);
     </div>
 </div>
 
-<script>
+<script nonce="<?php echo CSP_NONCE; ?>">
 const CSRF_TOKEN = '<?php echo getCsrfToken(); ?>';
 
 function joinLobby() {

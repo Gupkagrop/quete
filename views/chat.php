@@ -8,7 +8,7 @@
     </form>
 </div>
 
-<script>
+<script nonce="<?php echo CSP_NONCE; ?>">
 function handleChatSubmit(event) {
     event.preventDefault();
     const input = document.getElementById('chat-input');

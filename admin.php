@@ -25,7 +25,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>403 Доступ запрещен | Административный стенд</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-        <style>
+        <style nonce="<?php echo CSP_NONCE; ?>">
             body {
                 background-color: #1A1F3B;
                 color: #FFFFFF;
@@ -217,7 +217,7 @@ $chatMessages = $pdo->query('
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚙️ Панель Администратора | Куэте</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
+    <style nonce="<?php echo CSP_NONCE; ?>">
         /* === ПЕРЕМЕННЫЕ ЦВЕТОВ (Куэте - упрощенная плоская ретро-тема) === */
         :root {
             --bg-dark: #333B65;          /* Основной темно-синий фон */
@@ -862,7 +862,7 @@ $chatMessages = $pdo->query('
     </div>
 
     <!-- === КЛИЕНТСКИЙ СЦЕНАРИЙ ДЛЯ ТАБОВ === -->
-    <script>
+    <script nonce="<?php echo CSP_NONCE; ?>">
         document.addEventListener('DOMContentLoaded', () => {
             const tabs = document.querySelectorAll('.nav-link');
             const contents = document.querySelectorAll('.tab-content-panel');

@@ -51,10 +51,14 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
     <meta name="description" content="Игровой экран квиза Куэте. Отвечай на уникальные вопросы ИИ и обхитри соперников своими фейковыми ответами!">
     <link rel="canonical" href="https://quete.ru/game.php">
     <title>Куэте - Игра</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&family=Poppins:wght@600;700;800;900&family=Yanone+Kaffeesatz:wght@400;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&family=Poppins:wght@600;700;800;900&family=Yanone+Kaffeesatz:wght@400;700;800&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/game.css">
     <script src="assets/js/websocket-client.js?v=<?php echo time(); ?>"></script>
-    <style>
+    <style nonce="<?php echo CSP_NONCE; ?>">
         .timer-warning { color: #ff4444; }
         .btn-disabled { opacity: 0.5; cursor: not-allowed !important; background-color: #999; }
         .btn-disabled:hover { background-color: #999; }
@@ -240,7 +244,7 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
     </div>
 </div>
 
-<script>
+<script nonce="<?php echo CSP_NONCE; ?>">
 const LOBBY_ID = <?php echo $lobbyId; ?>;
 const USER_ID = <?php echo $_SESSION['user_id']; ?>;
 const IS_HOST = <?php echo $isHost ? 'true' : 'false'; ?>;

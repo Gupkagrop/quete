@@ -10,7 +10,6 @@ $flash_error = $_SESSION['flash_error'] ?? '';
 unset($_SESSION['flash_error']);
 include 'views/header.php';
 ?>
-<link rel="stylesheet" href="assets/css/auth.css">
 <?php if ($flash_error): ?>
     <div class="error-msg"><?php echo htmlspecialchars($flash_error); ?></div>
 <?php endif; ?>

@@ -12,7 +12,7 @@ port = 22
 username = "root"
 password = "_XrYd2K_GNgv2uK"
 
-local_root = r"c:\OSPanel\domains\quete\pre-alpha0.1.3-antigravity"
+local_root = r"c:\OSPanel\domains\quete\pre-alpha0.1.3-antigravity-git"
 remote_root = "/var/www/quete"
 
 ssh = paramiko.SSHClient()

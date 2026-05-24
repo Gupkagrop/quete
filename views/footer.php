@@ -60,7 +60,7 @@
     <button id="accept-cookies" class="cookie-accept-btn">Понятно</button>
 </div>
 
-<style>
+<style nonce="<?php echo CSP_NONCE; ?>">
 .site-footer {
     background: var(--section-orange);
     font-family: 'Inter', sans-serif;
@@ -320,7 +320,7 @@
 }
 </style>
 
-<script>
+<script nonce="<?php echo CSP_NONCE; ?>">
     document.addEventListener('DOMContentLoaded', function () {
         // Показываем баннер только если пользователь ещё не принял cookie
         if (!localStorage.getItem('cookie_accepted')) {

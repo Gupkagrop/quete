@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800;900&display=swap');
 
 /* === ПЕРЕМЕННЫЕ === */
 :root {
@@ -1084,4 +1083,14 @@ body {
         min-width: 28px !important; min-height: 28px !important;
         max-width: 28px !important; max-height: 28px !important;
     }
+}
+
+/* === ACCESSIBILITY FOCUS INDICATORS === */
+.card-btn:focus-visible,
+.answer-btn:focus-visible,
+.btn-game:focus-visible,
+.user-icon:focus-visible,
+.stats-close-btn:focus-visible {
+    outline: 4px solid var(--btn-inner-yellow) !important;
+    outline-offset: 3px;
 }
