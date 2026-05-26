@@ -48,30 +48,19 @@ $stmt->execute(['lid' => $lobbyId]);
 $stmt = $pdo->prepare('DELETE FROM generated_questions WHERE lobby_id = :lid');
 $stmt->execute(['lid' => $lobbyId]);
 
-// 2. Установить статистику победителя
-// Получить топ-3 игроков
-$scores = getPlayerScores($lobbyId);
-if (!empty($scores)) {
-    $winner = $scores[0];
-    
-    // Обновить статистику победителя в таблице users
-    $stmt = $pdo->prepare('UPDATE users SET wins_count = wins_count + 1 WHERE id = :uid');
-    $stmt->execute(['uid' => $winner['user_id']]);
-}
-
-// 3. Обнулить очки всех игроков
+// 4. Обнулить очки всех игроков
 $stmt = $pdo->prepare('UPDATE lobby_players SET current_points = 0 WHERE lobby_id = :lid');
 $stmt->execute(['lid' => $lobbyId]);
 
-// 4. Установить всех игроков в статус не готов (кроме хоста)
+// 5. Установить всех игроков в статус не готов (кроме хоста)
 $stmt = $pdo->prepare('UPDATE lobby_players SET is_ready = 0 WHERE lobby_id = :lid AND user_id != :host_id');
 $stmt->execute(['lid' => $lobbyId, 'host_id' => $lobby['host_id']]);
 
-// 5. Хост остаётся готовым (на его усмотрение)
+// 6. Хост остаётся готовым (на его усмотрение)
 $stmt = $pdo->prepare('UPDATE lobby_players SET is_ready = 1 WHERE lobby_id = :lid AND user_id = :host_id');
 $stmt->execute(['lid' => $lobbyId, 'host_id' => $lobby['host_id']]);
 
-// 6. Установить лобби в неактивное состояние
+// 7. Установить лобби в неактивное состояние
 $stmt = $pdo->prepare('UPDATE lobbies SET is_active = 0, current_round = 1 WHERE id = :lid');
 $stmt->execute(['lid' => $lobbyId]);
 

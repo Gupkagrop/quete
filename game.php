@@ -53,14 +53,10 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
     <title>Куэте - Игра</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" id="gfonts-preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&family=Poppins:wght@600;700;800;900&family=Yanone+Kaffeesatz:wght@400;700;800&display=swap" as="style">
-    <script nonce="<?php echo CSP_NONCE; ?>">
-        document.getElementById('gfonts-preload').rel = 'stylesheet';
-    </script>
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&family=Poppins:wght@600;700;800;900&family=Yanone+Kaffeesatz:wght@400;700;800&display=swap" rel="stylesheet"></noscript>
-    <link rel="stylesheet" href="assets/css/style.css"<?php echo get_sri_attrs('assets/css/style.css'); ?>>
-    <link rel="stylesheet" href="assets/css/game.css"<?php echo get_sri_attrs('assets/css/game.css'); ?>>
-    <script src="assets/js/websocket-client.js?v=<?php echo time(); ?>"<?php echo get_sri_attrs('assets/js/websocket-client.js'); ?>></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&family=Poppins:wght@600;700;800;900&family=Yanone+Kaffeesatz:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/game.css">
+    <script src="assets/js/websocket-client.js?v=<?php echo time(); ?>"></script>
     <style nonce="<?php echo CSP_NONCE; ?>">
         .timer-warning { color: #ff4444; }
         .btn-disabled { opacity: 0.5; cursor: not-allowed !important; background-color: #999; }
@@ -130,7 +126,7 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
                     <div style="font-size: 18px; color: #fff; line-height: 1.6; font-weight: bold; text-align: center; margin-top: 40px;">
                         Генерируем вопрос. Пожалуйста, подождите
                     </div>
-                    <img src="assets/img/brain_gears.png" class="state-img" alt="Thinking">
+                    <img src="assets/img/brain_gears.png" class="state-img" alt="Thinking" width="256" height="256">
                 </div>
             </div>
 
@@ -141,7 +137,7 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
                     <div class="waiting-text" style="margin-top: 40px; font-size: 20px;" id="wait-topic-text">
                         <span id="responsible-player-name" style="font-weight: bold; color: #ff8c2d;">...</span> выбирает тему
                     </div>
-                    <img src="assets/img/brain_gears.png" class="state-img" alt="Thinking">
+                    <img src="assets/img/brain_gears.png" class="state-img" alt="Thinking" width="256" height="256">
                 </div>
             </div>
 
@@ -154,7 +150,7 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
                     </div>
                     
                     <div style="margin-top: 30px;">
-                        <img src="assets/img/spy_mask.png" class="state-img" alt="Fake">
+                        <img src="assets/img/spy_mask.png" class="state-img" alt="Fake" width="256" height="256">
                         <div class="q-label">Придумай фейковый ответ:</div>
                         <form id="fake-form" onsubmit="submitFake(event)">
                             <input type="text" id="fake-input" class="auth-input" placeholder="Введи свой фейковый ответ..." maxlength="200" required>
@@ -175,7 +171,7 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
                     
                     <div class="waiting-text" style="margin-top: 40px; text-align: center; font-size: 18px;">
                         Все игроки предлагают свои фейковые ответы...
-                        <img src="assets/img/spy_mask.png" class="state-img" alt="Waiting for fakes">
+                        <img src="assets/img/spy_mask.png" class="state-img" alt="Waiting for fakes" width="256" height="256">
                     </div>
                 </div>
             </div>
@@ -187,7 +183,7 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
                         <div class="q-label">Какой ответ правильный?</div>
                         <div class="q-text" id="question-text-vote">Загрузка...</div>
                     </div>
-                    <img src="assets/img/question_mark.png" class="state-img" alt="Vote">
+                    <img src="assets/img/question_mark.png" class="state-img" alt="Vote" width="256" height="256">
                     
                     <div class="game-grid game-grid-3" id="answers-grid" style="margin-top: 30px;">
                         <!-- Заполняется через JavaScript -->
@@ -202,7 +198,7 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
             <div class="game-state" id="state-results">
                 <div class="game-inner-panel">
                     <div class="panel-title">Итоги раунда</div>
-                    <img src="assets/img/judge_sign.png" class="state-img" alt="Results">
+                    <img src="assets/img/judge_sign.png" class="state-img" alt="Results" width="256" height="256">
                     
                     <div class="result-item">
                         <div style="font-size: 12px; color: #999;">Правильный ответ:</div>

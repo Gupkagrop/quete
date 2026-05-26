@@ -979,9 +979,11 @@ function verifyWebSocketTicket($ticket)
     $stmt->execute(['ticket' => $ticket]);
     $userId = $stmt->fetchColumn();
     if ($userId) {
-        // Сбрасываем билет после использования
-        $stmt2 = $pdo->prepare('UPDATE users SET ws_ticket = NULL WHERE id = :uid');
-        $stmt2->execute(['uid' => $userId]);
+        // Чтобы позволить WebSocket-клиенту автоматически переподключаться при кратковременном разрыве связи
+        // (например, на мобильных устройствах), мы не сбрасываем билет в NULL сразу после первого подключения.
+        // Он в любом случае перезапишется новым уникальным токеном при обновлении страницы или переходе в другую игру.
+        // $stmt2 = $pdo->prepare('UPDATE users SET ws_ticket = NULL WHERE id = :uid');
+        // $stmt2->execute(['uid' => $userId]);
         return (int) $userId;
     }
     return null;

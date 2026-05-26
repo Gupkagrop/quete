@@ -189,14 +189,14 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff
 }
 
 .retro-waiting-icon { 
-    display: block; margin: 40px auto; max-width: 80px; width: 100%; 
+    display: block; margin: 40px auto; max-width: 80px; width: 100%; height: auto;
     image-rendering: pixelated; filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.6));
     animation: retro-spin 3s steps(8) infinite; 
 }
 @keyframes retro-spin { 100% { transform: rotate(360deg); } }
 
 .state-img { 
-    display: block; margin: 20px auto; max-width: 150px; width: 100%; 
+    display: block; margin: 20px auto; max-width: 150px; width: 100%; height: auto;
     image-rendering: pixelated; filter: drop-shadow(5px 5px 0 rgba(0,0,0,0.5));
     animation: float-pulse 2.5s infinite ease-in-out; 
 }

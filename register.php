@@ -18,7 +18,7 @@ include 'views/header.php';
     <div class="auth-wrapper">
         <div class="auth-card">
             <a href="index.php" class="auth-back">←</a>
-            <img src="assets/img/login_insert_coin.jpeg" alt="Insert Coin" class="retro-insert-coin">
+            <img src="assets/img/login_insert_coin.jpeg" alt="Insert Coin" class="retro-insert-coin" width="512" height="286">
             <h2 class="auth-title">Регистрация</h2>
             
             <form class="auth-form" method="POST" action="core/auth_handler.php">

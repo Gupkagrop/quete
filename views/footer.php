@@ -12,7 +12,9 @@
             <img src="assets/img/joystick.png"
                  alt="joystick"
                  class="footer-retro-icon"
-                 aria-hidden="true">
+                 aria-hidden="true"
+                 width="513"
+                 height="474">
             <p class="footer-tagline">Онлайн-квиз для компаний</p>
         </div>
 

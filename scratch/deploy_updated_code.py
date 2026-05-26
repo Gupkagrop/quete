@@ -90,6 +90,7 @@ files_to_upload = [
     "views/footer.php",
     "core/auth_handler.php",
     "core/db.php",
+    "ajax/reset_lobby.php",
     "hub.php",
     "lobby.php",
     ".htaccess",
