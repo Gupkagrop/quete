@@ -1,6 +1,7 @@
+<!-- Шаблон игрового чата для мгновенного общения между игроками. -->
 <div class="chat-container">
     <div class="chat-messages" id="chat-messages">
-        <!-- Messages will be loaded here via WebSocket -->
+        <!-- Сообщения будут динамически загружаться сюда -->
     </div>
     <form class="chat-form" id="chat-form" onsubmit="handleChatSubmit(event)">
         <input type="text" id="chat-input" placeholder="Введите сообщение..." required autocomplete="off">
@@ -9,6 +10,9 @@
 </div>
 
 <script nonce="<?php echo CSP_NONCE; ?>">
+// Функция: handleChatSubmit
+// Обывателю: Срабатывает при отправке сообщения (нажатии кнопки "Отправить" или Enter). 
+// Передаёт набранный текст WebSocket-клиенту для отправки на сервер и очищает поле ввода.
 function handleChatSubmit(event) {
     event.preventDefault();
     const input = document.getElementById('chat-input');
@@ -20,7 +24,9 @@ function handleChatSubmit(event) {
     }
 }
 
-// Загрузка истории чата
+// Функция: loadChatHistory
+// Обывателю: Делает фоновый запрос к серверу и загружает историю переписки в этой комнате, 
+// чтобы игрок видел предыдущие сообщения при входе.
 function loadChatHistory() {
     const lobbyId = typeof LOBBY_ID !== 'undefined' ? LOBBY_ID : null;
     if (!lobbyId) return;
@@ -39,6 +45,9 @@ function loadChatHistory() {
         .catch(e => console.error('Error loading chat:', e));
 }
 
+// Функция: appendChatMessageToBox
+// Обывателю: Безопасно (с защитой от вредоносного кода) оформляет сообщение и добавляет его 
+// в конец списка сообщений на экране, после чего прокручивает чат вниз.
 function appendChatMessageToBox(msg) {
     const chatBox = document.getElementById('chat-messages');
     if (!chatBox) return;
@@ -60,3 +69,4 @@ if (typeof appendChatMessage === 'undefined') {
 
 document.addEventListener('DOMContentLoaded', loadChatHistory);
 </script>
+

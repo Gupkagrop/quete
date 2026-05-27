@@ -1,4 +1,9 @@
 <?php
+/**
+ * AJAX-скрипт получения текущего состояния игры (игроки, очки, вопросы).
+ * Также автоматически подставляет ИИ-ответы (авто-фейки) игрокам, которые не успели сделать ход вовремя.
+ */
+
 session_start();
 ini_set('display_errors', '0');
 ini_set('display_startup_errors', '0');
@@ -6,8 +11,10 @@ error_reporting(E_ALL);
 require_once '../core/db.php';
 require_once '../core/ai_handler.php';
 
+// Указываем браузеру, что сервер вернет ответ в формате JSON в кодировке UTF-8
 header('Content-Type: application/json; charset=utf-8');
 
+// Кастомный обработчик ошибок PHP: превращает предупреждения в исключения (Exceptions) для более удобного отлова
 set_error_handler(function ($severity, $message, $file, $line) {
     if (!(error_reporting() & $severity)) {
         return false;
@@ -15,6 +22,7 @@ set_error_handler(function ($severity, $message, $file, $line) {
     throw new ErrorException($message, 0, $severity, $file, $line);
 });
 
+// Перехват критических ошибок (например, синтаксических сбоев) перед завершением работы скрипта
 register_shutdown_function(function () {
     $error = error_get_last();
     if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR], true)) {
@@ -29,6 +37,7 @@ register_shutdown_function(function () {
 });
 
 try {
+    // Проверяем авторизацию пользователя
     if (!isset($_SESSION['user_id'])) {
         http_response_code(401);
         echo json_encode(['success' => false, 'error' => 'Unauthorized']);
@@ -43,6 +52,7 @@ if (!$lobbyId) {
 }
 
 // === ПРОВЕРКА CSRF ===
+// Защита от межсайтовой подделки запросов (проверяем токен сессии)
 $csrfToken = $_GET['csrf_token'] ?? '';
 if (!verifyCsrfToken($csrfToken)) {
     http_response_code(403);
@@ -50,6 +60,7 @@ if (!verifyCsrfToken($csrfToken)) {
     exit;
 }
 
+// Загружаем данные лобби
 $lobby = getLobbyById($lobbyId);
 if (!$lobby) {
     http_response_code(404);
@@ -57,7 +68,7 @@ if (!$lobby) {
     exit;
 }
 
-// Проверить, что пользователь в лобби
+// Проверяем, состоит ли этот пользователь в данной игровой комнате
 $players = getLobbyPlayers($lobbyId);
 $inLobby = false;
 foreach ($players as $p) {
@@ -72,15 +83,15 @@ if (!$inLobby) {
     exit;
 }
 
+// Запрашиваем актуальный счет игроков
 $scores = getPlayerScores($lobbyId);
 $pdo = getPDO();
 
-// Получить АКТИВНЫЙ вопрос (is_active = 1)
+// Находим текущий активный вопрос для этой комнаты
 $stmt = $pdo->prepare('SELECT * FROM generated_questions WHERE lobby_id = :lid AND is_active = 1 LIMIT 1');
 $stmt->execute(['lid' => $lobbyId]);
 $currentQuestion = $stmt->fetch();
 
-// Проверить состояния
 $questionsInRound = 0;
 $allPlayersSubmittedFakes = false;
 $allVoted = false;
@@ -90,33 +101,33 @@ $needsAutoFakes = [];
 
 if ($currentQuestion) {
     // === ОБРАБОТКА ТАЙМАУТОВ ===
+    // Вычисляем, сколько секунд назад был задан вопрос
     $timeoutElapsed = getQuestionElapsedTime($currentQuestion['id']);
     $fakeAnswerTimeout = (int)$lobby['fake_answer_time'];
     
-    // Проверка таймаута на выбор темы (если вопрос только что создан и тема не выбрана ИИ)
+    // Проверка таймаута на выбор темы (зарезервировано для автоматического выбора, если игроки медлят)
     if ($timeoutElapsed >= $fakeAnswerTimeout && !$currentQuestion['auto_topic_selected']) {
-        // Автоматически выбрать тему и регенерировать вопрос если нужно
-        // На самом деле, если мы здесь, это значит что тема уже была выбрана (в select_topic.php)
-        // Это более сложный сценарий для будущего расширения
+        // Логика авто-выбора темы при необходимости
     }
     
-    // Подсчитать вопросы в раунде
+    // Подсчитываем порядковый номер текущего вопроса в раунде
     $stmt = $pdo->prepare('SELECT COUNT(*) FROM generated_questions WHERE lobby_id = :lid AND round_number = :round');
     $stmt->execute(['lid' => $lobbyId, 'round' => (int) $lobby['current_round']]);
     $questionsInRound = (int) $stmt->fetchColumn();
 
-    // Получить всех игроков
     $playerCount = count($players);
 
-    // Проверить, отправили ли все игроки фейки
+    // Проверяем, сколько игроков уже прислали свои фальшивые ответы
     $stmt = $pdo->prepare('SELECT COUNT(DISTINCT user_id) FROM player_answers WHERE question_id = :qid');
     $stmt->execute(['qid' => $currentQuestion['id']]);
     $fakesCount = (int) $stmt->fetchColumn();
     $allPlayersSubmittedFakes = ($fakesCount >= $playerCount);
 
-    // === ОБРАБОТКА ТАЙМАУТА НА ФЕЙК ===
+    // === ОБРАБОТКА ТАЙМАУТА НА ВВОД ФЕЙКА ===
+    // Если время вышло, но кто-то не отправил свой ложный ответ
     if (!$allPlayersSubmittedFakes && $timeoutElapsed >= $fakeAnswerTimeout) {
-        // Проверим, существует ли колонка auto_fakes_applied
+        // Проверяем, поддерживает ли база данных колонку блокировки авто-фейков,
+        // чтобы избежать двойной обработки от разных игроков
         $columnExists = false;
         try {
             $checkCol = $pdo->query("SHOW COLUMNS FROM generated_questions LIKE 'auto_fakes_applied'");
@@ -129,7 +140,7 @@ if ($currentQuestion) {
 
         $shouldApply = false;
         if ($columnExists) {
-            // Транзакционный SELECT FOR UPDATE
+            // Транзакционно проверяем и обновляем флаг применения авто-фейков
             $pdo->beginTransaction();
             $stmt = $pdo->prepare('SELECT auto_fakes_applied FROM generated_questions WHERE id = :qid FOR UPDATE');
             $stmt->execute(['qid' => $currentQuestion['id']]);
@@ -141,7 +152,7 @@ if ($currentQuestion) {
             }
             $pdo->commit();
         } else {
-            // Фолбэк: берем первого активного игрока из отсортированного списка
+            // Фолбэк (если колонки нет в БД): обработку берет на себя первый игрок в списке
             $sortedPlayerIds = array_map(function($p) { return (int)$p['user_id']; }, $players);
             sort($sortedPlayerIds);
             if (!empty($sortedPlayerIds) && (int)$_SESSION['user_id'] === $sortedPlayerIds[0]) {
@@ -149,23 +160,24 @@ if ($currentQuestion) {
             }
         }
 
+        // Если текущий запрос отвечает за генерацию авто-фейков
         if ($shouldApply) {
-            // Найти игроков, которые не отправили фейк
+            // Ищем список пользователей, которые еще не прислали ответ
             $playersWithoutFakes = getPlayersWithoutFakeAnswer($currentQuestion['id'], $lobbyId);
             
-            // Автоматически выбрать фейк для каждого
+            // Каждому из них подставляем случайный ложный ответ из пула ИИ
             foreach ($playersWithoutFakes as $userId) {
                 autoSelectFakeAnswerForPlayer($currentQuestion['id'], $userId);
-                $needsAutoFakes[] = $userId;
+                $needsAutoFakes[] = $userId; // Запоминаем, кому применили авто-фейк
             }
             
-            // Пересчитать количество отправивших фейки
+            // Пересчитываем количество готовых ответов после подстановки авто-фейков
             $stmt = $pdo->prepare('SELECT COUNT(DISTINCT user_id) FROM player_answers WHERE question_id = :qid');
             $stmt->execute(['qid' => $currentQuestion['id']]);
             $fakesCount = (int) $stmt->fetchColumn();
             $allPlayersSubmittedFakes = ($fakesCount >= $playerCount);
         } else if ($columnExists) {
-            // Если транзакционно уже применилось другим процессом, просто пересчитаем
+            // Если транзакцию применил другой конкурентный запрос, просто пересчитываем состояние
             $stmt = $pdo->prepare('SELECT COUNT(DISTINCT user_id) FROM player_answers WHERE question_id = :qid');
             $stmt->execute(['qid' => $currentQuestion['id']]);
             $fakesCount = (int) $stmt->fetchColumn();
@@ -173,25 +185,25 @@ if ($currentQuestion) {
         }
     }
 
-    // Проверить, голосовали ли все игроки
+    // Проверяем, проголосовали ли все игроки за выбранные варианты
     $stmt = $pdo->prepare('SELECT COUNT(DISTINCT voter_id) FROM votes WHERE question_id = :qid');
     $stmt->execute(['qid' => $currentQuestion['id']]);
     $votesCount = (int) $stmt->fetchColumn();
     $allVoted = ($votesCount >= $playerCount);
 }
 
-// Получить все ответы для текущего вопроса
+// Формируем список вариантов ответов для экрана голосования/результатов
 $answers = [];
 $playerAnswers = [];
 $userOwnAnswer = null;
 
 if ($currentQuestion) {
-    // Получить количество голосов за правильный ответ
+    // Считаем, сколько человек проголосовало за эталонный правильный ответ
     $stmt = $pdo->prepare('SELECT COUNT(*) FROM votes WHERE question_id = :qid AND LOWER(TRIM(selected_answer_text)) = LOWER(TRIM(:correct))');
     $stmt->execute(['qid' => $currentQuestion['id'], 'correct' => $currentQuestion['correct_answer']]);
     $correctAnswerVotes = (int) $stmt->fetchColumn();
 
-    // Добавить правильный ответ
+    // Добавляем правильный ответ в общий массив вариантов
     $answers[$currentQuestion['correct_answer']] = [
         'text' => $currentQuestion['correct_answer'],
         'is_correct' => true,
@@ -199,10 +211,10 @@ if ($currentQuestion) {
         'votes' => $correctAnswerVotes
     ];
 
-    // Получить собственный ответ текущего пользователя
+    // Находим ответ, который текущий игрок ввел сам
     $userOwnAnswer = getPlayerOwnAnswer($currentQuestion['id'], $_SESSION['user_id']);
 
-    // Добавить фейки игроков
+    // Запрашиваем ложные (фейковые) ответы, придуманные игроками, и число голосов за каждый из них
     $stmt = $pdo->prepare(
         'SELECT pa.answer_text, pa.user_id, u.username, MAX(COALESCE(vote_counts.votes, 0)) as votes ' .
         'FROM player_answers pa ' .
@@ -218,6 +230,7 @@ if ($currentQuestion) {
     ]);
     $fakes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // Добавляем фейковые ответы игроков в общий список
     foreach ($fakes as $fake) {
         $answers[$fake['answer_text']] = [
             'text' => $fake['answer_text'],
@@ -227,29 +240,32 @@ if ($currentQuestion) {
         ];
     }
 
-    // Получить выбранный ответ текущего пользователя
+    // Проверяем, за какой именно вариант проголосовал текущий пользователь
     $stmt = $pdo->prepare('SELECT selected_answer_text FROM votes WHERE question_id = :qid AND voter_id = :uid');
     $stmt->execute(['qid' => $currentQuestion['id'], 'uid' => $_SESSION['user_id']]);
     $userVote = $stmt->fetchColumn();
 }
 
-// Декодировать JSON для fakes если нужно
+// Декодируем массив ИИ-фейков из формата JSON
 if ($currentQuestion && isset($currentQuestion['fake_answers'])) {
     if (is_string($currentQuestion['fake_answers'])) {
         $currentQuestion['fake_answers'] = json_decode($currentQuestion['fake_answers'], true);
     }
 }
 
+// Проверяем статус фоновой генерации вопроса ИИ через временный лок-файл.
+// Если лок-файл существует и не устарел (>40 секунд), значит генерация ещё идёт.
 $tempFile = sys_get_temp_dir() . '/quete_lobby_' . $lobbyId . '_gen.tmp';
 $isGenerating = false;
 if (file_exists($tempFile)) {
     if (time() - filemtime($tempFile) > 40) {
-        @unlink($tempFile);
+        @unlink($tempFile); // Удаляем зависший лок-файл
     } else {
-        $isGenerating = true;
+        $isGenerating = true; // Блокировка активна
     }
 }
 
+// Возвращаем все собранные данные в формате JSON
 echo json_encode([
     'lobby' => $lobby,
     'players' => $players,
@@ -269,6 +285,7 @@ echo json_encode([
     'isGenerating' => $isGenerating,
 ]);
 } catch (Throwable $e) {
+    // В случае критического сбоя логируем ошибку и отдаем клиенту JSON с сообщением о сбое
     http_response_code(500);
     error_log('ajax/game_state_update.php error: ' . $e->getMessage());
     error_log($e->getTraceAsString());

@@ -1,3 +1,4 @@
+<!-- Общий подвал (footer) страниц с баннером согласия на обработку файлов Cookie. -->
 <footer class="site-footer">
     <div class="footer-inner">
 
@@ -42,7 +43,7 @@
     <!-- Разделитель -->
     <div class="footer-divider"></div>
 
-    <!-- Нижняя строка -->
+    <!-- Нижняя строка подвала -->
     <div class="footer-bottom">
         <div class="footer-legal">
             <a href="terms.php">Соглашение</a>
@@ -54,6 +55,7 @@
 </footer>
 
 <!-- === Cookie Banner === -->
+<!-- Баннер Cookie: всплывающее уведомление для согласия пользователя с использованием cookie -->
 <div id="cookie-banner" class="cookie-banner">
     <div class="cookie-text">
         🍪 Мы используем <b>cookie</b> для работы сайта и авторизации.
@@ -62,6 +64,7 @@
     <button id="accept-cookies" class="cookie-accept-btn">Понятно</button>
 </div>
 
+<!-- Стили оформления подвала сайта и адаптивная верстка под мобильные экраны -->
 <style nonce="<?php echo CSP_NONCE; ?>">
 .site-footer {
     background: var(--section-orange);
@@ -322,6 +325,9 @@
 }
 </style>
 
+<!-- Скрипт проверки согласия с Cookies:
+     Если пользователь еще не нажимал кнопку "Понятно" (нет записи в памяти браузера),
+     то показываем баннер, иначе скрываем его. При клике сохраняем выбор в память. -->
 <script nonce="<?php echo CSP_NONCE; ?>">
     document.addEventListener('DOMContentLoaded', function () {
         // Показываем баннер только если пользователь ещё не принял cookie

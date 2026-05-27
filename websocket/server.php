@@ -1,10 +1,7 @@
 #!/usr/bin/env php
 <?php
 /**
- * WebSocket сервер для игры Куэте
- * 
- * Запуск: php websocket/server.php
- * По умолчанию слушает на localhost:8080
+ * Скрипт для запуска фоновой службы WebSocket-сервера Ratchet.
  */
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -22,18 +19,20 @@ $host = WS_HOST;
 
 echo "Starting WebSocket server on {$host}:{$port}\n";
 
-// Проверка подключения к базе данных
+// Перед запуском сервера проверяем, отвечает ли база данных
 try {
     getPDO();
     echo "Database connection: OK\n";
 } catch (\Exception $e) {
     echo "Database connection: FAILED - " . $e->getMessage() . "\n";
-    // Мы не выходим, так как сервер может работать без БД (но без чата)
+    // Мы не останавливаем работу, так как сервер может попытаться запуститься (хотя функционал будет ограничен)
 }
 
+// Создаем экземпляр нашего игрового WebSocket-обработчика и оборачиваем его в стандартные сетевые протоколы
 $app = new GameWebSocket();
 $handler = new HttpServer(new WsServer($app));
 
+// Инициализируем и запускаем сетевой сервер на указанном порту
 try {
     $io = IoServer::factory($handler, $port, $host);
     echo "WebSocket server is running at ws://{$host}:{$port}\n";
@@ -44,3 +43,4 @@ try {
     exit(1);
 }
 ?>
+

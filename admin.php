@@ -1,14 +1,14 @@
 <?php
 /**
-     * Упрощенная панель администратора игры "Куэте" (admin.php)
- * Доступ строго ограничен пользователем с никнеймом "admin".
+ * Панель администратора игры. Позволяет просматривать статистику, управлять комнатами и пользователями.
  */
 
 session_start();
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/core/db.php';
 
-// Проверка доступа
+// Блок проверки прав доступа: если пользователь не вошел в систему или его имя не "admin", 
+// доступ запрещается, отображается страница с сообщением об ошибке 403.
 if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
     header('HTTP/1.1 403 Forbidden');
     ?>
@@ -39,7 +39,9 @@ $pdo = getPDO();
 $csrfToken = getCsrfToken();
 $message = '';
 
-// Обработка административных действий
+// Обработка административных действий:
+// Этот блок обрабатывает запросы на очистку старых комнат, удаление конкретного лобби или
+// удаление пользователя. Все запросы защищены от подделки с помощью CSRF-токена безопасности.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         $message = 'Ошибка безопасности (CSRF).';
@@ -69,12 +71,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Сбор статистики
+// Сбор статистики:
+// Запросы к базе данных для подсчета общего числа пользователей, комнат (лобби) и сгенерированных ИИ вопросов.
 $usersCount = $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
 $lobbiesCount = $pdo->query('SELECT COUNT(*) FROM lobbies')->fetchColumn();
 $questionsCount = $pdo->query('SELECT COUNT(*) FROM generated_questions')->fetchColumn();
 
-// Получение списка лобби
+// Получение списка активных лобби:
+// Запрос выбирает все игровые комнаты вместе с именами их создателей и количеством подключенных в данный момент игроков.
 $lobbies = $pdo->query('
     SELECT l.*, u.username as host_name,
            (SELECT COUNT(*) FROM lobby_players lp WHERE lp.lobby_id = l.id) as current_players
@@ -83,7 +87,9 @@ $lobbies = $pdo->query('
     ORDER BY l.id DESC
 ')->fetchAll();
 
-// Поиск и список пользователей
+// Поиск и вывод списка пользователей:
+// Если администратор ввел запрос в строку поиска, то ищем пользователя по никнейму или почте. 
+// Иначе выводим последние 20 зарегистрированных аккаунтов.
 $searchTerm = trim($_GET['search_user'] ?? '');
 if ($searchTerm !== '') {
     $stmt = $pdo->prepare('SELECT id, username, email, wins_count FROM users WHERE username LIKE :search OR email LIKE :search LIMIT 50');
@@ -93,7 +99,8 @@ if ($searchTerm !== '') {
     $usersList = $pdo->query('SELECT id, username, email, wins_count FROM users ORDER BY id DESC LIMIT 20')->fetchAll();
 }
 
-// Последние сообщения чата
+// Получение последних сообщений чата:
+// Выбирает 15 самых свежих сообщений из игровых комнат, чтобы администратор мог отслеживать переписку игроков.
 $chatMessages = $pdo->query('
     SELECT cm.*, u.username, l.lobby_name
     FROM chat_messages cm

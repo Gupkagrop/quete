@@ -1,24 +1,24 @@
+/* Общие стили. */
 
-/* === ПЕРЕМЕННЫЕ ЦВЕТОВ === */
+/* Цвета */
 :root {
-    --bg-dark: #333B65;          /* Основной темно-синий фон */
-    --accent-orange: #FF7A00;    /* Яркий оранжевый для кнопок и текста */
-    --section-orange: #D5791C;   /* Тусклый оранжевый для нижней секции */
-    --pill-dark: #293563;        /* Темный цвет для плашек и карточек */
+    --bg-dark: #333B65;
+    --accent-orange: #FF7A00;
+    --section-orange: #D5791C;
+    --pill-dark: #293563;
 }
 
-/* === БАЗОВЫЕ НАСТРОЙКИ === */
+/* Базовые настройки */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff; overflow-x: hidden; }
 
-/* === ШАПКА И ЛОГОТИП === */
+/* Шапка и логотип */
 .header-wrapper {
     padding: 20px 30px;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
-/* .logo-box и .footer-logo — общий стиль определён в footer.php */
 .logo-box { 
     background: #000; color: var(--accent-orange); text-decoration: none;
     padding: 8px 18px 8px 12px; border-radius: 10px; display: inline-flex;
@@ -29,7 +29,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff
 }
 .logo-box:hover { opacity: 0.88; transform: translateY(-1px); }
 
-/* WebSocket-индикатор в шапке */
+/* WS-индикатор */
 #ws-status {
     width: 12px; height: 12px;
     border-radius: 50%;
@@ -39,7 +39,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff
     margin-left: auto;
 }
 
-/* === ГЛАВНЫЙ ЭКРАН (HERO) === */
+/* Главный экран */
 .hero { 
     position: relative; padding: 60px 50px 120px 80px; 
     min-height: 550px; display: flex; flex-direction: column; justify-content: center; 
@@ -61,7 +61,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff
 }
 .hero h1 img { width: 70px; }
 
-/* Текстовая плашка под заголовком */
+/* Подзаголовок */
 .sub-pill { 
     background: var(--pill-dark); 
     padding: clamp(20px, 2.5vw, 30px) clamp(25px, 3vw, 40px); 
@@ -74,7 +74,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff
 }
 .sub-pill p { font: 800 clamp(18px, 1.8vw, 22px)/1.2 'Inter', sans-serif; }
 
-/* Кнопки "Войти" и "Регистрация" */
+/* Кнопки */
 .hero-btns { display: flex; gap: 30px; }
 .btn-pill { 
     background: var(--accent-orange); color: #000; text-decoration: none;
@@ -87,7 +87,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff
 }
 .btn-pill:hover { transform: scale(1.05); }
 
-/* === ДЕКОРАЦИИ СПРАВА (КАРТОЧКА И ДЖОЙСТИК) === */
+/* Декорации */
 .hero-right { position: absolute; top: 0; right: 0; width: 50%; height: 100%; }
 .quiz-card-decor { 
     background: var(--pill-dark); width: 340px; padding: 35px; border-radius: 30px; 
@@ -97,16 +97,16 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff
 .quiz-card-decor .a-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font: 700 12px 'Inter', sans-serif; }
 .joystick-icon { width: 260px; height: auto; aspect-ratio: 1 / 1; position: absolute; top: 270px; right: 180px; z-index: 2; }
 
-/* === ОРАНЖЕВАЯ СЕКЦИЯ С ФИЧАМИ === */
+/* Фичи */
 .features-section { background: var(--section-orange); padding: 80px 40px 120px; }
 .features-grid { display: flex; gap: 25px; max-width: 1300px; margin: 0 auto 100px; }
 .feature-item { 
     background: var(--bg-dark); flex: 1; padding: 50px 30px; border-radius: 20px; 
     font: 700 20px 'Inter', sans-serif; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.2);
-    display: grid; place-items: center; min-height: 160px; /* Быстрое центрирование текста по вертикали и горизонтали */
+    display: grid; place-items: center; min-height: 160px; 
 }
 
-/* === СЛАЙДЕР === */
+/* Слайдер */
 .slider-area { display: flex; align-items: center; justify-content: center; gap: 40px; }
 .carousel { position: relative; width: 900px; height: 400px; }
 .slide { position: absolute; top: 50%; transform: translateY(-50%); max-width: 400px; height: auto; aspect-ratio: 8 / 5; transition: .5s; opacity: 0; }
@@ -115,17 +115,15 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff
 .slide.right { left: 90%; transform: translate(-50%, -50%) scale(0.8); opacity: .3; z-index: 1; }
 .arrow-btn { font-size: 80px; color: #fff; cursor: pointer; font-weight: 300; }
 
-/* === АДАПТИВНОСТЬ (Телефоны и планшеты) === */
+/* Адаптивность */
 @media (max-width: 1200px) {
     .features-grid { flex-direction: column; width: 100%; }
     .carousel { width: 100%; max-width: 720px; height: 350px; }
     .slide { max-width: 320px; }
-    
-    /* Скрытие декоративного правого блока и центрирование hero на планшетах */
     .hero { padding: 40px 20px; text-align: center; align-items: center; }
     .hero-left { max-width: 100%; width: 100%; align-items: center; }
     .hero h1 { font-size: 42px; flex-direction: column; }
-    .hero-right { display: none; } /* Прячем карточку и джойстик на планшетах */
+    .hero-right { display: none; } 
     .sub-pill { padding: 25px 30px; border-radius: 30px; margin-bottom: 35px; }
     .hero-btns { flex-direction: column; width: 100%; gap: 15px; }
     .btn-pill { width: 100%; }
@@ -158,7 +156,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff
     .arrow-btn { font-size: 40px; }
 }
 
-/* === RETRO IMAGES === */
+/* Изображения */
 .retro-insert-coin { 
     display: block; margin: 0 auto 20px; max-width: 200px; width: 100%; height: auto; 
     image-rendering: pixelated; filter: drop-shadow(0 0 15px rgba(255, 122, 0, 0.4)); 
@@ -225,7 +223,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff
     }
 }
 
-/* === АДАПТИВНОСТЬ (2K И БОЛЬШИЕ ЭКРАНЫ) === */
+/* Большие экраны */
 @media (min-width: 1600px) {
     .header-wrapper { padding: 40px 0 0 80px; max-width: 1800px; margin: 0 auto; }
     
@@ -254,7 +252,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff
     .arrow-btn { font-size: 100px; }
 }
 
-/* === ACCESSIBILITY FOCUS INDICATORS === */
+/* Фокус */
 .logo-box:focus-visible,
 .btn-pill:focus-visible,
 .arrow-btn:focus-visible,
@@ -264,4 +262,133 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff
 .footer-legal a:focus-visible {
     outline: 4px solid var(--accent-orange) !important;
     outline-offset: 4px;
+}
+
+/* ================================================================
+   КАСТОМНЫЕ СТРАНИЦЫ ОШИБОК
+   ================================================================ */
+.error-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 120px - 200px);
+    padding: 60px 20px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.error-container {
+    max-width: 600px;
+    width: 100%;
+    background: rgba(41, 53, 99, 0.4);
+    border: 3px solid var(--accent-orange);
+    border-radius: 30px;
+    padding: 50px 40px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(255, 122, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    backdrop-filter: blur(10px);
+    box-sizing: border-box;
+}
+
+.error-code-glow {
+    font: 900 clamp(60px, 8vw, 100px) 'Poppins', sans-serif;
+    color: #fff;
+    text-shadow: 0 0 10px var(--accent-orange), 0 0 20px var(--accent-orange);
+    line-height: 1;
+    margin-bottom: -5px;
+    letter-spacing: 2px;
+    animation: error-text-pulse 2s infinite alternate;
+}
+
+@keyframes error-text-pulse {
+    0% {
+        text-shadow: 0 0 10px var(--accent-orange), 0 0 20px var(--accent-orange);
+        transform: scale(1);
+    }
+    100% {
+        text-shadow: 0 0 15px var(--accent-orange), 0 0 30px var(--accent-orange), 0 0 40px #ff3c00;
+        transform: scale(1.05);
+    }
+}
+
+.error-retro-img {
+    width: 120px;
+    height: auto;
+    image-rendering: pixelated;
+    filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.5));
+}
+
+.error-title {
+    font: 900 28px 'Inter', sans-serif;
+    color: var(--accent-orange);
+    margin-bottom: 5px;
+}
+
+.error-description {
+    font: 500 16px/1.6 'Inter', sans-serif;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 10px;
+}
+
+.error-actions {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+}
+
+.error-actions .btn-pill {
+    padding: 12px 30px;
+    font-size: 18px;
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.error-actions .btn-secondary {
+    background: #000;
+    color: var(--accent-orange);
+    border: 2px solid var(--accent-orange);
+    box-shadow: 3px 3px 0 var(--accent-orange);
+    border-radius: 50px;
+    font: 800 18px 'Inter', sans-serif;
+    transition: .2s ease;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.error-actions .btn-secondary:hover {
+    background: var(--accent-orange);
+    color: #000;
+    box-shadow: none;
+    transform: translate(3px, 3px);
+}
+
+@media (max-width: 768px) {
+    .error-page {
+        padding: 40px 15px;
+    }
+    .error-container {
+        padding: 35px 25px;
+        border-radius: 20px;
+    }
+    .error-title {
+        font-size: 22px;
+    }
+    .error-description {
+        font-size: 14px;
+    }
+    .error-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    .error-actions .btn-pill {
+        width: 100%;
+    }
 }

@@ -1,5 +1,10 @@
 <?php
+/**
+ * Основной игровой экран викторины (ввод тем, отправка фейков, голосование и результаты).
+ */
+
 session_start();
+// Проверка авторизации: если игрок не вошел, отправляем на страницу входа
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
@@ -57,19 +62,7 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/game.css">
     <script src="assets/js/websocket-client.js?v=<?php echo time(); ?>"></script>
-    <style nonce="<?php echo CSP_NONCE; ?>">
-        .timer-warning { color: #ff4444; }
-        .btn-disabled { opacity: 0.5; cursor: not-allowed !important; background-color: #999; }
-        .btn-disabled:hover { background-color: #999; }
-        .result-correct { color: #4abb5f; font-weight: bold; font-size: 18px; }
-        .result-item { padding: 10px; background: rgba(0,0,0,0.1); margin: 10px 0; border-radius: 5px; }
-        .player-name { font-size: 12px; color: #999; margin-top: 5px; }
-        .votes-badge { display: inline-block; font-size: 11px; background: rgba(255,140,45,0.3); padding: 3px 8px; border-radius: 3px; margin-top: 5px; }
-        .podium-place { margin: 20px 0; padding: 15px; background: rgba(0,0,0,0.1); border-radius: 5px; text-align: center; }
-        .medal { font-size: 40px; margin-bottom: 10px; }
-        .podium-name { font-size: 18px; font-weight: bold; margin: 10px 0; }
-        .podium-score { font-size: 16px; color: #ffcc00; font-weight: bold; }
-    </style>
+
 </head>
 <body>
 
@@ -205,7 +198,7 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
                         <div class="result-correct" id="correct-answer-display">--</div>
                     </div>
     
-                    <div id="results-list" style="margin: 20px 0; max-height: 300px; overflow-y: auto;">
+                    <div id="results-list" class="results-scroll-area">
                         <!-- Заполняется через JavaScript -->
                     </div>
     
@@ -219,7 +212,7 @@ $wsTicket = generateWebSocketTicket($_SESSION['user_id']);
             <div class="game-state" id="state-podium">
                 <div class="game-inner-panel">
                     <div class="panel-title">Игра завершена! 🎉</div>
-                    <div id="podium-body" style="margin: 30px 0;">
+                    <div id="podium-body" class="podium-container" style="margin: 30px 0;">
                         <!-- Заполнится через JavaScript -->
                     </div>
                     <div style="text-align: center; margin-top: 40px; color: #999; font-size: 14px;">
@@ -270,6 +263,7 @@ let isTransitioning = false;
 let isGeneratingQuestion = false;
 let resultsCountdownInterval = null;
 
+// Подключает игру к WebSocket-серверу и запускает резервный опрос (polling) при обрыве связи.
 function startConnection() {
     socketClient = new GameWebSocketClient(LOBBY_ID, USER_ID, {
         host: WS_HOST,
@@ -291,6 +285,7 @@ function startConnection() {
     }, POLLING_INTERVAL);
 }
 
+// Обрабатывает входящие события WebSocket (подключения, выход из комнаты, действия игроков, чат).
 function handleSocketMessage(msg) {
     console.log('WS Message:', msg);
     
@@ -322,6 +317,7 @@ function handleSocketMessage(msg) {
 }
 
 
+// Запрашивает текущее состояние игры с сервера и обновляет интерфейс.
 function updateGameState() {
     if (!LOBBY_ID) return;
     
@@ -487,6 +483,7 @@ function updateGameState() {
         });
 }
 
+// Определяет текущее состояние игры на основе полученных с сервера данных.
 function determineGameState(data) {
     if (!data.lobby.is_active) {
         return 'podium';
@@ -503,6 +500,7 @@ function determineGameState(data) {
     return 'wait-fakes';
 }
 
+// Собирает все ответы, исключая собственный ответ игрока, и перемешивает их.
 function cacheAndFilterAnswers(data) {
     if (!data.answers) return [];
     let answers = Object.values(data.answers);
@@ -510,6 +508,7 @@ function cacheAndFilterAnswers(data) {
     return shuffleArray(answers);
 }
 
+// Создает на экране кнопки с вариантами ответов для голосования.
 function renderAnswersFromCache() {
     const grid = document.getElementById('answers-grid');
     if (!grid || !answersCache) return;
@@ -532,12 +531,15 @@ function renderAnswersFromCache() {
     });
 }
 
+// Переключает экраны игры и обновляет заголовок.
 function switchState(stateId, title) {
     document.querySelectorAll('.game-state').forEach(s => s.classList.remove('active'));
     document.getElementById(stateId)?.classList.add('active');
     document.getElementById('dynamic-window-title').textContent = title;
+    window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
+// Обновляет таблицу с текущими очками игроков.
 function updateScoreboard(scores) {
     const board = document.getElementById('scoreboard');
     board.innerHTML = scores.map((s, i) => {
@@ -549,6 +551,7 @@ function updateScoreboard(scores) {
 let localTimerInterval = null;
 let currentLocalTimeLeft = 0;
 
+// Запускает обратный отсчет времени на экране.
 function startLocalTimer(timeLeft) {
     if (localTimerInterval) clearInterval(localTimerInterval);
     currentLocalTimeLeft = timeLeft;
@@ -569,6 +572,7 @@ function startLocalTimer(timeLeft) {
     }
 }
 
+// Обновляет визуальное отображение таймера.
 function updateTimerDisplay(timeLeft) {
     const display = document.getElementById('fake-timer-display');
     const container = document.getElementById('fake-timer-container');
@@ -585,6 +589,7 @@ function updateTimerDisplay(timeLeft) {
     }
 }
 
+// Выводит текст текущего вопроса.
 function displayQuestion(question, elementId = 'question-text') {
     const elem = document.getElementById(elementId);
     if (elem && question) {
@@ -592,12 +597,14 @@ function displayQuestion(question, elementId = 'question-text') {
     }
 }
 
+// Подсвечивает выбранный вариант ответа.
 function selectAnswer(btn, answer) {
     document.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
     selectedAnswer = answer;
 }
 
+// Переводит игру к следующему вопросу (начисляет очки, генерирует новый вопрос, переключает состояние).
 async function transitionToNextQuestion() {
     if (!IS_HOST || isTransitioning) return; 
     isTransitioning = true;
@@ -654,6 +661,7 @@ async function transitionToNextQuestion() {
     }
 }
 
+// Возвращает всех игроков в лобби ожидания после завершения игры.
 function returnToLobby() {
     clearInterval(pollInterval);
     clearTimeout(automaticTransitionTimer);
@@ -672,6 +680,7 @@ function returnToLobby() {
     });
 }
 
+// Запускает 10-секундный таймер на экране результатов раунда до перехода.
 function startResultsCountdown() {
     if (resultsCountdownInterval) clearInterval(resultsCountdownInterval);
     
@@ -697,6 +706,7 @@ function startResultsCountdown() {
     }, 1000);
 }
 
+// Отправляет выбранную тему на сервер для генерации вопроса через ИИ.
 function submitTopic() {
     const topic = document.getElementById('topic-input').value.trim();
     const btn = document.getElementById('topic-submit-btn');
@@ -749,6 +759,7 @@ function submitTopic() {
     });
 }
 
+// Отправляет ложный ответ игрока на сервер.
 function submitFake(event) {
     event.preventDefault();
     const fake = document.getElementById('fake-input').value.trim();
@@ -790,6 +801,7 @@ function submitFake(event) {
     });
 }
 
+// Отправляет голос игрока за выбранный ответ.
 function submitVote() {
     if (!selectedAnswer) return;
     const btn = document.getElementById('vote-submit-btn');
@@ -822,6 +834,7 @@ function submitVote() {
     });
 }
 
+// Показывает результаты текущего вопроса (правильный ответ, фейки игроков и голоса).
 function displayResults(data) {
     document.getElementById('correct-answer-display').textContent = data.currentQuestion.correct_answer;
     const resultsList = document.getElementById('results-list');
@@ -840,6 +853,7 @@ function displayResults(data) {
     }
 }
 
+// Показывает подиум победителей (топ-3 игрока) в конце матча.
 function displayPodium(scores) {
     const podium = document.getElementById('podium-body');
     const top3 = scores.slice(0, 3);
@@ -860,6 +874,7 @@ function displayPodium(scores) {
     }).join('');
 }
 
+// Вспомогательная функция перемешивания элементов массива.
 function shuffleArray(array) {
     const arr = [...array];
     for (let i = arr.length - 1; i > 0; i--) {

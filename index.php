@@ -1,6 +1,11 @@
-<?php include 'views/header.php'; ?>
+<?php
+/**
+ * Главная (лендинг) страница игры "Куэте" с описанием и правилами.
+ */
+include 'views/header.php'; ?>
 
-<!-- Разметка структурированных данных JSON-LD (Schema.org) для SEO -->
+<!-- Разметка структурированных данных JSON-LD (Schema.org): помогает поисковым системам (Google, Яндекс) 
+     лучше понять структуру нашего сайта и красиво выводить его в результатах поиска (SEO). -->
 <script type="application/ld+json" nonce="<?php echo CSP_NONCE; ?>">
 {
   "@context": "https://schema.org",
@@ -73,6 +78,9 @@
             </div>
             <div class="arrow-btn next" role="button" tabindex="0" aria-label="Следующий слайд">→</div>
         </div>
+        <!-- Скрипт управления слайдером скриншотов:
+             Этот код отвечает за то, чтобы картинки (скриншоты игры) сменялись автоматически 
+             каждые 10 секунд, а также при клике по стрелкам "Влево" и "Вправо" или при нажатии кнопок с клавиатуры. -->
         <script nonce="<?php echo CSP_NONCE; ?>">
             document.addEventListener('DOMContentLoaded', function() {
                 const slides = document.querySelectorAll('.carousel .slide');

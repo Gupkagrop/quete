@@ -1,4 +1,8 @@
-<?php include 'views/header.php'; ?>
+<?php
+/**
+ * Пользовательское соглашение игры "Куэте".
+ */
+include 'views/header.php'; ?>
 <main style="padding: 100px 20px; color: white; max-width: 800px; margin: 0 auto; line-height: 1.6;">
     <h1 style="color: var(--accent-orange); margin-bottom: 20px;">Пользовательское соглашение</h1>
     <p><em>Дата последнего обновления: <?php echo date('d.m.Y'); ?></em></p>

@@ -1,12 +1,18 @@
 <?php
+/**
+ * Комната ожидания игры, где игроки готовятся к старту матча.
+ */
+
 session_start();
 require_once 'core/db.php';
+// Проверка авторизации: если пользователь не вошел в систему, отправляем на страницу входа
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
 }
 $user = getUserById($_SESSION['user_id']);
 
+// Получение ID лобби и информации о нем. Если комната не найдена, отправляем пользователя в хаб.
 $lobbyId = (int) ($_GET['lobby_id'] ?? 0);
 $lobby = getLobbyById($lobbyId);
 if (!$lobby) {
@@ -14,7 +20,7 @@ if (!$lobby) {
     exit;
 }
 
-// Если игрок уже в другом лобби, отправим в него
+// Если игрок уже состоит в другом лобби, перенаправим его туда, чтобы он не находился в двух комнатах одновременно.
 $currentLobby = getLobbyByUserId($_SESSION['user_id']);
 if ($currentLobby && $currentLobby['id'] !== $lobbyId) {
     if ($currentLobby['is_active']) {
@@ -25,7 +31,7 @@ if ($currentLobby && $currentLobby['id'] !== $lobbyId) {
     exit;
 }
 
-// Проверяем, состоит ли уже пользователь в лобби
+// Проверяем, состоит ли игрок уже в списке участников этой комнаты.
 $players = getLobbyPlayers($lobbyId);
 $userInLobby = false;
 foreach ($players as $p) {
@@ -35,7 +41,8 @@ foreach ($players as $p) {
     }
 }
 
-// Если лобби закрытое и пользователь заходит впервые
+// Если лобби приватное (закрытое паролем), и пользователь пытается зайти в него впервые,
+// то проверяем пароль, отправленный из хаба. Если пароль неверный, возвращаем в главное меню.
 if (!$userInLobby && $lobby['password'] !== null) {
     $postedPassword = $_POST['lobby_password'] ?? '';
     if ($postedPassword !== $lobby['password']) {
@@ -45,7 +52,7 @@ if (!$userInLobby && $lobby['password'] !== null) {
     }
 }
 
-// Присоединиться, если не в лобби
+// Присоединяемся к лобби, если игрока еще нет в списке участников. Если комната переполнена, выводим ошибку.
 if (!$userInLobby) {
     $joined = joinLobby($lobbyId, $_SESSION['user_id']);
     if (!$joined) {
@@ -72,7 +79,7 @@ foreach ($players as $p) {
     }
 }
 
-// Обработка готовности
+// Обработка готовности игрока (метод POST): обычный игрок может переключать свой статус "Готов" / "Не готов".
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ready'])) {
     if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         http_response_code(403);
@@ -80,14 +87,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ready'])) {
     }
     
     $ready = (bool) $_POST['ready'];
-    if (!$isHost) { // Хост всегда готов
+    if (!$isHost) { // Хост всегда готов по умолчанию
         setPlayerReady($lobbyId, $_SESSION['user_id'], $ready);
     }
     header('Location: lobby.php?lobby_id=' . $lobbyId);
     exit;
 }
 
-// Обработка запуска игры
+// Обработка команды запуска игры хостом (создателем лобби).
+// Игра может начаться, только если в комнате как минимум 2 игрока и все они нажали "Готов".
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['start'])) {
     if (!$isHost) {
         header('Location: lobby.php?lobby_id=' . $lobbyId);
@@ -105,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['start'])) {
     exit;
 }
 
-// Обработка изменения настроек лобби хостом
+// Обработка изменения настроек лобби (название комнаты, лимиты игроков, таймер, пароль) создателем.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
     if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         http_response_code(403);
@@ -302,6 +310,9 @@ const CSRF_TOKEN = '<?php echo getCsrfToken(); ?>';
 const WS_PORT = <?php echo WS_CLIENT_PORT; ?>;
 const WS_HOST = "<?php echo WS_CLIENT_HOST; ?>";
 
+// Функция: startConnection
+// Обывателю: Подключает лобби к WebSocket-серверу для мгновенного обновления списка игроков 
+// и статусов готовности без перезагрузки страницы. Запускает резервный опрос (polling) при обрыве связи.
 function startConnection() {
     socketClient = new GameWebSocketClient(LOBBY_ID, USER_ID, {
         host: WS_HOST,
@@ -337,6 +348,9 @@ function startConnection() {
     }, 10000);
 }
 
+// Функция: updateLobbyState
+// Обывателю: Запрашивает у сервера свежую информацию о лобби и обновляет список игроков 
+// и статус кнопки "Начать" на экране.
 function updateLobbyState() {
     fetch(`ajax/get_lobby_update.php?lobby_id=${LOBBY_ID}&csrf_token=${CSRF_TOKEN}`)
         .then(response => {
@@ -416,6 +430,8 @@ function updateLobbyState() {
         });
 }
 
+// Функция: toggleReady
+// Обывателю: Переключает статус готовности игрока (Готов / Не готов) и сообщает об этом остальным через WebSocket.
 function toggleReady(event) {
     event.preventDefault();
     const newReadyStatus = isReady ? 0 : 1;
@@ -434,6 +450,8 @@ function toggleReady(event) {
     });
 }
 
+// Функция: updateLobbySettings
+// Обывателю: Отправляет измененные создателем настройки лобби на сервер и оповещает остальных участников.
 function updateLobbySettings(event) {
     event.preventDefault();
     const form = event.target;
@@ -474,6 +492,8 @@ function updateLobbySettings(event) {
     });
 }
 
+// Функция: startGameHandler
+// Обывателю: Отправляет запрос на запуск игры и перенаправляет создателя (а за ним и остальных игроков) на экран игры.
 function startGameHandler() {
     const startBtn = document.getElementById('start-btn');
     if (startBtn.disabled) return;
@@ -498,6 +518,8 @@ function startGameHandler() {
     .catch(error => console.error('Start game error:', error));
 }
 
+// Функция: toggleSettingsPasswordGroup
+// Обывателю: Показывает или скрывает поле ввода пароля в настройках лобби в зависимости от выбранного режима (Открытое/Закрытое).
 function toggleSettingsPasswordGroup() {
     const passwordGroup = document.getElementById('settings-password-group');
     const isPrivate = document.getElementById('mode-private').checked;

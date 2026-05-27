@@ -1,7 +1,7 @@
-/**
- * WebSocket клиент для игры Куэте
- */
+// Клиентский скрипт для подключения и общения с игровым WebSocket-сервером в реальном времени.
+
 class GameWebSocketClient {
+    // Создает объект клиента для связи с сервером игры.
     constructor(lobbyId, userId, options = {}) {
         this.lobbyId = lobbyId;
         this.userId = userId;
@@ -20,9 +20,7 @@ class GameWebSocketClient {
         this.manuallyClosed = false;
     }
 
-    /**
-     * Подключиться к WebSocket серверу
-     */
+    // Подключается к серверу и настраивает обработку событий (вход, сообщения, отключение).
     connect() {
         this.updateStatusIndicator('connecting');
         let url = `${this.protocol}://${this.host}:${this.port}`;
@@ -72,9 +70,7 @@ class GameWebSocketClient {
         }
     }
 
-    /**
-     * Попытка переподключения
-     */
+    // Пытается подключиться заново, если связь оборвалась.
     attemptReconnect() {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             this.reconnectAttempts++;
@@ -85,9 +81,7 @@ class GameWebSocketClient {
         }
     }
 
-    /**
-     * Присоединиться к лобби
-     */
+    // Сообщает серверу, что игрок зашел в конкретную комнату (лобби).
     joinLobby() {
         this.send({
             action: 'join',
@@ -96,9 +90,7 @@ class GameWebSocketClient {
         });
     }
 
-    /**
-     * Отправить действие
-     */
+    // Отправляет игровое действие (например, выбор темы или ответ на вопрос).
     sendAction(actionType, data = {}) {
         this.send({
             action: 'action',
@@ -109,9 +101,7 @@ class GameWebSocketClient {
         });
     }
 
-    /**
-     * Отправить уведомление об обновлении
-     */
+    // Уведомляет сервер об изменениях (например, обновлении настроек или статуса).
     notifyUpdate(data = {}) {
         this.send({
             action: 'update',
@@ -121,9 +111,7 @@ class GameWebSocketClient {
         });
     }
 
-    /**
-     * Низкоуровневая отправка сообщения
-     */
+    // Отправляет сырые данные на сервер, если соединение открыто.
     send(data) {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(JSON.stringify(data));
@@ -132,9 +120,7 @@ class GameWebSocketClient {
         }
     }
 
-    /**
-     * Закрыть соединение
-     */
+    // Отключает игрока от сервера по его инициативе.
     disconnect() {
         this.manuallyClosed = true;
         if (this.socket) {
@@ -142,9 +128,7 @@ class GameWebSocketClient {
         }
     }
 
-    /**
-     * Послать сообщение в чат
-     */
+    // Отправляет текстовое сообщение в игровой чат.
     sendChat(message, username = '') {
         this.send({
             action: 'chat',
@@ -155,9 +139,7 @@ class GameWebSocketClient {
         });
     }
 
-    /**
-     * Экранирование HTML для защиты от XSS
-     */
+    // Очищает текст от опасных HTML-символов, предотвращая выполнение чужого вредоносного кода.
     static escapeHtml(text) {
         if (!text) return '';
         const div = document.createElement('div');
@@ -165,16 +147,12 @@ class GameWebSocketClient {
         return div.innerHTML;
     }
 
-    /**
-     * Проверяет, подключен ли сокет в данный момент
-     */
+    // Проверяет, работает ли соединение с сервером прямо сейчас.
     isConnected() {
         return this.socket && this.socket.readyState === WebSocket.OPEN;
     }
 
-    /**
-     * Обновить визуальный индикатор статуса
-     */
+    // Выводит в консоль браузера текущее состояние подключения.
     updateStatusIndicator(status) {
         if (status === 'online') {
             console.log('%c[WebSocket Server Status]: ONLINE / CONNECTED', 'color: #4dff4d; font-weight: bold; font-size: 11px;');

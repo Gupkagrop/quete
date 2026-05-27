@@ -1,5 +1,6 @@
+/* Авторизация и регистрация. */
 
-/* === ПЕРЕМЕННЫЕ === */
+/* Переменные */
 :root {
     --input-bg: #fff;
     --text-dark: #000;
@@ -9,66 +10,63 @@
     --pill-dark: #293563;
 }
 
-/* Сообщение об ошибке (сверху формы) */
+/* Ошибка */
 .error-msg { color: #ff4d4d; margin-bottom: 20px; text-align: center; font-weight: 700; }
 
-/* === ОСНОВНОЙ КОНТЕЙНЕР === */
+/* Контейнер */
 .auth-container { 
     min-height: calc(100vh - 100px); background: var(--bg-dark); 
-    display: grid; place-items: center; /* Центрирует карточку ровно посередине экрана */
+    display: grid; place-items: center; 
     padding: 40px 20px; 
 }
 .auth-wrapper { width: 100%; max-width: 550px; }
 .auth-card { 
     padding: 50px; 
     position: relative; 
-    /* Возвращен оригинальный бесшовный дизайн без рамок, фона и тени */
 }
 
-/* Возвращена исходная простая стрелочка «Назад» без круглого оформления */
+/* Кнопка назад */
 .auth-back { 
     position: absolute; top: 20px; left: 20px; font-size: 24px; color: var(--text-light); 
     text-decoration: none; font-weight: 800; transition: .2s; 
 }
 .auth-back:hover { transform: translateX(-5px); }
 
-/* Заголовок формы */
+/* Заголовок */
 .auth-title { font: 900 32px 'Inter', sans-serif; color: var(--text-light); text-align: center; margin-bottom: 40px; }
 
-/* === ПОЛЯ ВВОДА === */
+/* Поля ввода */
 .auth-form { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
-/* Возвращены исходные поля ввода без темно-синей границы */
 .auth-input { 
     height: 60px; padding: 0 24px; border: none; border-radius: 8px; 
     background: var(--input-bg); color: var(--text-dark); outline: none; transition: .2s;
-    font: 700 18px 'Yanone Kaffeesatz', sans-serif; /* Шрифт как на макете */
+    font: 700 18px 'Yanone Kaffeesatz', sans-serif; 
 }
 .auth-input:focus { box-shadow: 0 0 0 3px rgba(255, 140, 45, .3); }
 .auth-input::placeholder { color: #999; }
 
-/* === КНОПКИ === */
+/* Кнопки */
 .auth-btn { 
     height: 60px; border: none; border-radius: 8px; width: 100%; cursor: pointer; transition: .2s; 
     background: var(--accent-orange); color: var(--text-dark); text-decoration: none;
-    display: grid; place-items: center; /* Центрируем текст в кнопке */
+    display: grid; place-items: center; 
     font: 800 24px 'Yanone Kaffeesatz', sans-serif; 
 }
 .auth-btn:hover { transform: scale(1.02); box-shadow: 0 10px 30px rgba(255, 140, 45, .3); }
 
-/* Вторичная кнопка (ссылка снизу) */
+/* Ссылка внизу */
 .auth-btn-secondary { text-decoration: underline; }
 .auth-btn-secondary:hover { background: rgba(255, 140, 45, .8); box-shadow: none; }
 
-/* === РАЗДЕЛИТЕЛЬ "ИЛИ" === */
+/* Разделитель */
 .auth-divider { display: flex; align-items: center; margin: 30px 0; gap: 15px; }
 .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.2); }
 .auth-divider span { color: rgba(255,255,255,.6); font-size: 14px; font-weight: 700; }
 
-/* === АДАПТИВНОСТЬ (Мобильные устройства) === */
+/* Адаптивность */
 @media (max-width: 768px) { 
     .auth-card { padding: 40px 20px; }
     .auth-title { font-size: 24px; margin-bottom: 30px; }
-    /* Уменьшаем высоту полей и кнопок на телефонах */
     .auth-input, .auth-btn { height: 50px; font-size: 16px; padding: 0 16px; }
     .auth-back { top: 15px; left: 15px; font-size: 20px; }
 }
@@ -90,7 +88,7 @@
     .auth-divider { margin: 10px 0; }
 }
 
-/* === RETRO IMAGES === */
+/* Изображения */
 .retro-insert-coin { 
     display: block; margin: 0 auto 20px; max-width: 200px; width: 100%; height: auto; 
     image-rendering: pixelated; filter: drop-shadow(0 0 15px rgba(255, 122, 0, 0.4)); 
@@ -105,7 +103,7 @@
     .retro-insert-coin { max-width: 150px; }
 }
 
-/* === ДОПОЛНИТЕЛЬНЫЕ КЛАССЫ И ИНДИКАТОРЫ ФОКУСА === */
+/* Дополнительно */
 .auth-checkbox-group {
     margin-top: 10px;
     margin-bottom: 20px;

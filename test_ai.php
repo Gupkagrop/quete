@@ -1,13 +1,12 @@
 <?php
 /**
- * Упрощенный диагностический стенд ИИ (test_ai.php)
- * Доступ строго ограничен пользователем с никнеймом "admin".
+ * Диагностический стенд администратора для тестирования интеграции с Groq AI.
  */
 
 session_start();
 require_once __DIR__ . '/config.php';
 
-// Проверка доступа
+// Блок проверки прав: доступ на стенд разрешен только вошедшему пользователю с именем "admin"
 if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
     header('HTTP/1.1 403 Forbidden');
     ?>
@@ -39,6 +38,7 @@ require_once __DIR__ . '/core/ai_handler.php';
 $result = null;
 $action = $_POST['action'] ?? '';
 
+// Обработка отправки формы тестирования (выполнение пинга, валидации, генерации или сравнения)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         if ($action === 'ping') {

@@ -102,20 +102,3 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     INDEX idx_lobby_created (lobby_id, created_at)
 );
 
--- =========================================================================
--- ЗАПРОСЫ ДЛЯ ОБНОВЛЕНИЯ СУЩЕСТВУЮЩЕЙ БД (ЕСЛИ ТАБЛИЦЫ УЖЕ БЫЛИ СОЗДАНЫ):
--- Скопируйте и запустите в phpMyAdmin -> вкладка SQL при необходимости:
---
--- ALTER TABLE users ADD COLUMN ws_ticket VARCHAR(255) DEFAULT NULL;
--- ALTER TABLE lobbies ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
--- ALTER TABLE generated_questions ADD COLUMN points_awarded TINYINT(1) NOT NULL DEFAULT 0;
--- ALTER TABLE generated_questions ADD COLUMN auto_fakes_applied TINYINT(1) NOT NULL DEFAULT 0;
--- ALTER TABLE generated_questions ADD COLUMN auto_topic_selected BOOLEAN DEFAULT FALSE;
--- ALTER TABLE player_answers ADD COLUMN is_auto_selected BOOLEAN DEFAULT FALSE;
--- ALTER TABLE lobby_players ADD COLUMN avatar_id INT DEFAULT 1;
---
--- -- Индексы для оптимизации:
--- ALTER TABLE lobby_players ADD UNIQUE INDEX idx_lobby_user (lobby_id, user_id);
--- ALTER TABLE generated_questions ADD INDEX idx_lobby_active_round (lobby_id, is_active, round_number);
--- ALTER TABLE chat_messages ADD INDEX idx_lobby_created (lobby_id, created_at);
--- =========================================================================

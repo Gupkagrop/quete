@@ -1,6 +1,11 @@
 <?php
+/**
+ * Всплывающее окно личной статистики игрока и лидерборда.
+ */
+
 $showLeaveButton = $showLeaveButton ?? false;
 $pdo = getPDO();
+// Получаем топ-5 игроков по количеству побед и правильных ответов
 $stmt = $pdo->query('SELECT username, wins_count, correct_answers, total_answers FROM users ORDER BY wins_count DESC, correct_answers DESC LIMIT 5');
 $leaderboard = $stmt->fetchAll();
 ?>
@@ -31,11 +36,16 @@ $leaderboard = $stmt->fetchAll();
         </div>
 
         <?php if ($showLeaveButton): ?>
+            <!-- Форма выхода из лобби (активируется по нажатию кнопки) -->
             <form action="leave_lobby.php" method="POST" id="leave-lobby-form" style="display:none;">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCsrfToken()); ?>">
             </form>
             <button class="btn-game" onclick="handleLeaveLobby()">Выйти из лобби</button>
             <script nonce="<?php echo CSP_NONCE; ?>">
+            // Функция: handleLeaveLobby
+            // Обывателю: Если игрок — создатель лобби, перед выходом отправляет по сети сигнал о том,
+            // что лобби удаляется (чтобы у остальных игроков тоже закрылось окно), 
+            // после чего отправляет форму выхода.
             function handleLeaveLobby() {
                 if (typeof IS_HOST !== 'undefined' && IS_HOST && typeof socketClient !== 'undefined' && socketClient && socketClient.isConnected()) {
                     socketClient.sendAction('lobby_deleted');
@@ -56,7 +66,10 @@ $leaderboard = $stmt->fetchAll();
         <?php endif; ?>
     </div>
 </div>
+
 <script nonce="<?php echo CSP_NONCE; ?>">
+// Функция: toggleStatsPopup
+// Обывателю: Показывает или скрывает всплывающее окно статистики на экране.
 function toggleStatsPopup() {
     const overlay = document.getElementById('stats-overlay');
     if (overlay) {
@@ -64,6 +77,7 @@ function toggleStatsPopup() {
     }
 }
 
+// Скрипт закрытия окна статистики при клике на темный фон вне его карточки
 document.addEventListener('click', function(event) {
     const overlay = document.getElementById('stats-overlay');
     const icon = document.querySelector('.user-icon');
@@ -73,3 +87,4 @@ document.addEventListener('click', function(event) {
     }
 });
 </script>
+

@@ -1,9 +1,14 @@
 <?php
+/**
+ * AJAX-скрипт для отправки голоса за выбранный ответ. Запрещает голосовать за себя или дважды.
+ */
+
 session_start();
 require_once '../core/db.php';
 
 header('Content-Type: application/json');
 
+// Проверяем авторизацию пользователя
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
@@ -22,6 +27,7 @@ if (!$lobbyId || !$questionId || empty($answer)) {
 }
 
 // === ПРОВЕРКА CSRF ===
+// Защита от подделки запросов со сторонних сайтов
 $csrfToken = $data['csrf_token'] ?? '';
 if (!verifyCsrfToken($csrfToken)) {
     http_response_code(403);
@@ -29,6 +35,7 @@ if (!verifyCsrfToken($csrfToken)) {
     exit;
 }
 
+// Проверяем существование лобби
 $lobby = getLobbyById($lobbyId);
 if (!$lobby) {
     http_response_code(404);
@@ -36,6 +43,7 @@ if (!$lobby) {
     exit;
 }
 
+// Проверяем, совпадает ли вопрос с текущим активным вопросом
 $question = getCurrentQuestion($lobbyId);
 if (!$question || $question['id'] != $questionId) {
     http_response_code(400);
@@ -44,13 +52,14 @@ if (!$question || $question['id'] != $questionId) {
 }
 
 // === КРИТИЧЕСКАЯ ПРОВЕРКА: НЕЛЬЗЯ ГОЛОСОВАТЬ ЗА СОБСТВЕННЫЙ ОТВЕТ ===
+// Чтобы игроки не накручивали очки за свои же фейки, голосование за свой ответ блокируется.
 if (isVoteForOwnAnswer($questionId, $_SESSION['user_id'], $answer)) {
     http_response_code(403);
     echo json_encode(['success' => false, 'error' => 'Вы не можете голосовать за свой собственный ответ']);
     exit;
 }
 
-// Проверить, не голосовал ли уже этот игрок
+// === Проверяем, не голосовал ли уже этот игрок ранее ===
 $pdo = getPDO();
 $stmt = $pdo->prepare('SELECT 1 FROM votes WHERE question_id = :qid AND voter_id = :uid LIMIT 1');
 $stmt->execute(['qid' => $questionId, 'uid' => $_SESSION['user_id']]);
@@ -60,6 +69,7 @@ if ($stmt->fetch()) {
     exit;
 }
 
+// Записываем голос в базу данных
 submitVote($questionId, $_SESSION['user_id'], $answer);
 
 echo json_encode(['success' => true, 'message' => 'Vote submitted successfully']);

@@ -1,5 +1,10 @@
 <?php
+/**
+ * Игровой хаб (главное меню) со списком комнат, созданием лобби и личной статистикой.
+ */
+
 session_start();
+// Проверка авторизации: если пользователь не зашел в систему, отправляем его на страницу авторизации
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
@@ -7,6 +12,7 @@ if (!isset($_SESSION['user_id'])) {
 require_once 'core/db.php';
 $user = getUserById($_SESSION['user_id']);
 
+// Если пользователь уже состоит в каком-то активном лобби, перенаправляем его сразу туда (чтобы избежать дублирования окон)
 $currentLobby = getLobbyByUserId($_SESSION['user_id']);
 if ($currentLobby) {
     if ($currentLobby['is_active']) {
@@ -17,7 +23,8 @@ if ($currentLobby) {
     exit;
 }
 
-// Обработка создания лобби
+// Обработка создания нового лобби: 
+// Происходит, когда пользователь заполняет форму создания и нажимает кнопку "Создать".
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['lobby_name'])) {
     if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         die('Invalid CSRF token');
@@ -47,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['lobby_name'])) {
     exit;
 }
 
+// Получение списка всех существующих комнат (лобби) из базы данных
 $lobbies = getLobbies();
 $flashError = $_SESSION['flash_error'] ?? null;
 unset($_SESSION['flash_error']);
@@ -166,7 +174,7 @@ unset($_SESSION['flash_error']);
                     </div>
 
                     <div class="btn-row">
-                        <a href="solo.php" class="btn-game" style="text-decoration:none; text-align:center; line-height:30px; margin-right:10px;">СОЛО</a>
+                        <a href="solo.php" class="btn-game">СОЛО</a>
                         <button class="btn-game" type="submit">Создать</button>
                     </div>
                 </form>
@@ -198,6 +206,9 @@ unset($_SESSION['flash_error']);
 <script nonce="<?php echo CSP_NONCE; ?>">
 const CSRF_TOKEN = '<?php echo getCsrfToken(); ?>';
 
+// Функция: joinLobby
+// Обывателю: Перенаправляет игрока в выбранную игровую комнату. 
+// Если она закрыта паролем, то сначала открывает окно для его ввода.
 function joinLobby() {
     const selected = document.querySelector('input[name="selected_lobby"]:checked');
     if (!selected) {
@@ -214,6 +225,8 @@ function joinLobby() {
     }
 }
 
+// Функция: openPasswordOverlay
+// Обывателю: Показывает всплывающее окошко для ввода пароля от приватной комнаты.
 function openPasswordOverlay(lobbyId) {
     const overlay = document.getElementById('password-overlay');
     const form = document.getElementById('password-join-form');
@@ -225,6 +238,8 @@ function openPasswordOverlay(lobbyId) {
     }
 }
 
+// Функция: closePasswordOverlay
+// Обывателю: Закрывает всплывающее окошко ввода пароля.
 function closePasswordOverlay() {
     const overlay = document.getElementById('password-overlay');
     if (overlay) {
@@ -232,6 +247,8 @@ function closePasswordOverlay() {
     }
 }
 
+// Функция: togglePasswordVisibility
+// Обывателю: Позволяет скрыть или показать вводимые символы пароля (скрыть за точками или показать буквами).
 function togglePasswordVisibility(inputId) {
     const input = document.getElementById(inputId);
     if (input) {
@@ -239,6 +256,8 @@ function togglePasswordVisibility(inputId) {
     }
 }
 
+// Функция: toggleCreatePasswordGroup
+// Обывателю: При создании лобби показывает или скрывает поле ввода пароля в зависимости от выбранного режима (Открытое/Закрытое).
 function toggleCreatePasswordGroup() {
     const isPrivate = document.querySelector('input[name="mode"]:checked').value === 'private';
     const group = document.getElementById('create-password-group');
@@ -255,6 +274,8 @@ function toggleCreatePasswordGroup() {
     }
 }
 
+// Функция: validateLobbyCreation
+// Обывателю: Проверяет перед созданием закрытой комнаты, что пароль имеет надежную длину (не менее 4 символов).
 function validateLobbyCreation(event) {
     const isPrivate = document.querySelector('input[name="mode"]:checked').value === 'private';
     const password = document.getElementById('create-password').value.trim();
@@ -271,6 +292,8 @@ document.addEventListener('click', function(event) {
     }
 });
 
+// Функция: updateLobbies
+// Обывателю: Делает запрос к серверу и обновляет на экране список доступных комнат (лобби) без перезагрузки страницы.
 function updateLobbies() {
     fetch(`ajax/get_lobbies_update.php?csrf_token=${CSRF_TOKEN}`)
         .then(response => response.json())

@@ -1,28 +1,25 @@
 <?php
+/**
+ * Класс-обработчик WebSocket-соединений (игровой сервер реального времени).
+ */
+
 namespace Quete;
 
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 
-/**
- * WebSocket сервер для игры Куэте
- * 
- * Структура сообщений:
- * {
- *   "action": "join|leave|update",
- *   "lobby_id": 1,
- *   "user_id": 1,
- *   "data": {...}
- * }
- */
+// Класс GameWebSocket: обрабатывает сетевые события (открытие соединения, получение сообщений, отключение клиентов).
 class GameWebSocket implements MessageComponentInterface {
     protected $clients;
-    protected $lobbies = []; // lobby_id => [connections]
+    protected $lobbies = []; // Список активных комнат и подключенных к ним клиентов: lobby_id => [connections]
     
     public function __construct() {
         $this->clients = new \SplObjectStorage;
     }
     
+    /**
+     * onOpen — Обработка нового сетевого подключения.
+     */
     public function onOpen(ConnectionInterface $conn) {
         $this->clients->attach($conn);
         echo "New connection: {$conn->resourceId}\n";
@@ -52,6 +49,9 @@ class GameWebSocket implements MessageComponentInterface {
         echo "Connection {$conn->resourceId} authenticated as User ID: {$userId} ({$conn->username})\n";
     }
     
+    /**
+     * onMessage — Обработка входящего сообщения от игрока.
+     */
     public function onMessage(ConnectionInterface $from, $msg) {
         try {
             $data = json_decode($msg, true);
@@ -143,6 +143,9 @@ class GameWebSocket implements MessageComponentInterface {
         }
     }
     
+    /**
+     * onClose — Обработка отключения игрока.
+     */
     public function onClose(ConnectionInterface $conn) {
         $this->clients->detach($conn);
         
@@ -163,13 +166,16 @@ class GameWebSocket implements MessageComponentInterface {
         echo "Connection {$conn->resourceId} disconnected\n";
     }
     
+    /**
+     * onError — Обработка возникших сетевых ошибок.
+     */
     public function onError(ConnectionInterface $conn, \Exception $e) {
         echo "Error: {$e->getMessage()}\n";
         $conn->close();
     }
     
     /**
-     * Отправить сообщение всем игрокам в лобби
+     * broadcast — Рассылка сообщения всем участникам комнаты (лобби).
      */
     private function broadcast($lobbyId, $msg) {
         if (!isset($this->lobbies[$lobbyId])) {

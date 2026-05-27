@@ -1,6 +1,13 @@
 <?php
+/**
+ * Общая шапка (header) страниц с навигацией, мета-теги и SEO-оптимизацией.
+ */
+
 require_once __DIR__ . '/../config.php';
 
+// Проверяем сессию и авторизацию:
+// Если пользователь авторизован, контролируем его местоположение: не даем зайти на сторонние страницы, 
+// если он уже состоит в активном лобби, и автоматически перенаправляем его обратно.
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -15,7 +22,7 @@ if (isset($_SESSION['user_id'])) {
             header('Location: game.php?lobby_id=' . $currentLobby['id']);
             exit;
         }
-        // Проверить, что пользователь действительно в лобби (не выгнан)
+        // Проверяем, что пользователь действительно находится в лобби (чтобы не было редиректа, если его кикнули)
         $players = getLobbyPlayers($currentLobby['id']);
         $stillInLobby = false;
         foreach ($players as $p) {
@@ -26,7 +33,7 @@ if (isset($_SESSION['user_id'])) {
         }
         
         if (!$stillInLobby && !in_array($currentPage, ['hub.php', 'login.php', 'register.php', 'leave_lobby.php'])) {
-            // Пользователь был выгнан из лобби, перенаправить на hub
+            // Пользователь был выгнан из лобби, перенаправляем на hub
             header('Location: hub.php');
             exit;
         }
@@ -41,11 +48,14 @@ if (isset($_SESSION['user_id'])) {
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <?php if (isset($isErrorPage) && $isErrorPage): ?>
+        <base href="<?php echo htmlspecialchars(rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\') . '/'); ?>">
+    <?php endif; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Куэте: онлайн-викторина с ИИ-генерацией вопросов. Сыграй в соло или с друзьями в ламповой ретро-атмосфере!">
     
-    <!-- Канонический URL для предотвращения дублей -->
+    <!-- Канонический URL для предотвращения дублирования страниц в поисковиках -->
     <?php
     $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     if ($requestUri === '/index.php' || $requestUri === '') {
@@ -55,7 +65,7 @@ if (isset($_SESSION['user_id'])) {
     ?>
     <link rel="canonical" href="<?php echo htmlspecialchars($canonicalUrl); ?>">
 
-    <!-- Open Graph (VK, Telegram, Facebook) -->
+    <!-- Настройки Open Graph (для красивого превью ссылок в VK, Telegram, WhatsApp) -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Куэте - Онлайн квиз с ИИ-вопросами">
     <meta property="og:description" content="Ламповая онлайн-викторина с генерацией вопросов искусственным интеллектом в реальном времени. Сыграй с друзьями или в соло!">
@@ -63,24 +73,25 @@ if (isset($_SESSION['user_id'])) {
     <meta property="og:image" content="https://quete.ru/assets/img/login_insert_coin.jpeg">
     <meta property="og:site_name" content="Куэте">
 
-    <!-- Twitter Cards -->
+    <!-- Карточка Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Куэте - Онлайн квиз с ИИ-вопросами">
     <meta name="twitter:description" content="Ламповая онлайн-викторина с генерацией вопросов искусственным интеллектом в реальном времени. Сыграй с друзьями или в соло!">
     <meta name="twitter:image" content="https://quete.ru/assets/img/login_insert_coin.jpeg">
 
-    <!-- Место для тегов верификации вебмастеров (раскомментируйте и вставьте ваши ключи) -->
-    <!-- <meta name="google-site-verification" content="ВАШ_КОД_GOOGLE" /> -->
-    <!-- <meta name="yandex-verification" content="ВАШ_КОД_YANDEX" /> -->
-
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <title>Куэте - Онлайн квиз</title>
+    
+    <!-- Подключаем фирменные шрифты Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&family=Poppins:wght@600;700;800;900&family=Yanone+Kaffeesatz:wght@400;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Подключаем стили оформления -->
+    <link rel="stylesheet" href="assets/css/style.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/style.css'); ?>">
     <?php
     $currentPage = basename($_SERVER['PHP_SELF']);
+    // Дополнительно подключаем стили авторизации, если мы находимся на страницах входа/регистрации
     if (in_array($currentPage, ['login.php', 'register.php'])) {
         echo '    <link rel="stylesheet" href="assets/css/auth.css">' . PHP_EOL;
     }

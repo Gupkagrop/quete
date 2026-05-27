@@ -1,9 +1,14 @@
 <?php
+/**
+ * AJAX-скрипт получения статуса комнаты ожидания (состав игроков и их готовность).
+ */
+
 session_start();
 require_once '../core/db.php';
 
 header('Content-Type: application/json');
 
+// Проверяем авторизацию текущего пользователя
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     exit;
@@ -17,6 +22,7 @@ if (!$lobbyId) {
 }
 
 // === ПРОВЕРКА CSRF ===
+// Проверка секретного ключа сессии для защиты от подделки запросов
 $csrfToken = $_GET['csrf_token'] ?? '';
 if (!verifyCsrfToken($csrfToken)) {
     http_response_code(403);
@@ -24,6 +30,7 @@ if (!verifyCsrfToken($csrfToken)) {
     exit;
 }
 
+// Загружаем данные лобби
 $lobby = getLobbyById($lobbyId);
 if (!$lobby) {
     http_response_code(404);
@@ -31,6 +38,7 @@ if (!$lobby) {
     exit;
 }
 
+// Проверяем, действительно ли запрашивающий игрок состоит в этом лобби
 $players = getLobbyPlayers($lobbyId);
 $userInLobby = false;
 foreach ($players as $p) {
@@ -46,6 +54,7 @@ if (!$userInLobby) {
     exit;
 }
 
+// Возвращаем данные о лобби и массив всех подключенных игроков с их статусами
 echo json_encode([
     'lobby' => $lobby,
     'players' => $players

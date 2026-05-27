@@ -1,8 +1,13 @@
 <?php
+/**
+ * Тренировочный одиночный режим игры.
+ */
+
 session_start();
 require_once 'core/db.php';
 require_once 'core/ai_handler.php';
 
+// Проверка авторизации: играть могут только зарегистрированные и вошедшие пользователи
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
@@ -17,7 +22,7 @@ $currentQuestionNum = (int)($_SESSION['solo_q_num'] ?? 0);
 $score = (int)($_SESSION['solo_score'] ?? 0);
 $questions = $_SESSION['solo_questions'] ?? [];
 
-// Обработка действий
+// Обработка действий игрока (метод POST): старт игры, отправка ответа, переход к следующему вопросу или перезапуск.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $csrfToken = $_POST['csrf_token'] ?? '';
     if (!verifyCsrfToken($csrfToken)) {
@@ -122,6 +127,9 @@ include 'views/header.php';
 <link rel="stylesheet" href="assets/css/game.css">
 
 <script nonce="<?php echo CSP_NONCE; ?>">
+// Функция: showSoloGeneratingMessage
+// Обывателю: Блокирует интерфейс и показывает красивое окно ожидания ("Генерируем вопрос..."),
+// пока искусственный интеллект придумывает новые вопросы по теме.
 function showSoloGeneratingMessage() {
     // Немедленно отключаем кнопки для предотвращения двойных кликов
     const btns = document.querySelectorAll('.btn-game, .card-btn');
@@ -148,12 +156,16 @@ function showSoloGeneratingMessage() {
     }
 }
 
+// Функция: handleSoloCheckSubmit
+// Обывателю: Запускает блокировку кнопок при переходе к следующему вопросу, предотвращая повторные отправки.
 function handleSoloCheckSubmit(event, isNextQuestion) {
     if (isNextQuestion) {
         showSoloGeneratingMessage();
     }
 }
 
+// Таймер автоперехода: на экране проверки правильности ответа автоматически отсчитывает 
+// 10 секунд, после чего отправляет форму дальше.
 document.addEventListener('DOMContentLoaded', () => {
     const checkSeconds = document.getElementById('solo-check-seconds');
     if (checkSeconds) {
@@ -184,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="game-window">
         <div class="window-header">
             <div class="window-title">СОЛО ИГРА<?php echo $topic ? ' - ' . htmlspecialchars($topic) : ''; ?></div>
-            <div style="position: absolute; right: 60px; top: 13px; font-size: 12px; color: #fff; opacity: 0.8;">
+            <div class="window-stats">
                 Вопрос: <?php echo $currentQuestionNum; ?>/3 | Счёт: <?php echo $score; ?>/3
             </div>
             <a href="javascript:void(0)" class="user-icon" onclick="toggleStatsPopup()" style="right: 10px;">
@@ -211,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="text" name="topic" class="form-input" placeholder="Введите тему (например: Космос)" required autocomplete="off">
                         <div class="btn-row">
                             <button type="submit" class="btn-game">Начать</button>
-                            <a href="hub.php" class="btn-game" style="text-decoration:none; text-align:center; line-height:30px;">В хаб</a>
+                            <a href="hub.php" class="btn-game">В хаб</a>
                         </div>
                     </form>
                 </div>
@@ -278,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <input type="hidden" name="csrf_token" value="<?php echo getCsrfToken(); ?>">
                             <button type="submit" class="btn-game">Продолжить (Новая тема)</button>
                         </form>
-                        <a href="hub.php" class="btn-game" style="text-decoration:none; text-align:center; line-height:30px;">Выйти в хаб</a>
+                        <a href="hub.php" class="btn-game">Выйти в хаб</a>
                     </div>
                 </div>
             <?php endif; ?>
@@ -301,9 +313,26 @@ document.addEventListener('DOMContentLoaded', () => {
 .correct-text { color: #4CAF50; font-weight: bold; }
 .wrong-text { color: #f44336; text-decoration: line-through; }
 .final-score { font-size: 28px; color: #ffeb3b; margin-top: 20px; word-wrap: break-word; overflow-wrap: break-word; }
-.header-stats { color: #fff; font-size: 14px; opacity: 0.8; }
+.window-stats {
+    position: absolute;
+    right: 60px;
+    top: 13px;
+    font-size: 12px;
+    color: #fff;
+    opacity: 0.8;
+}
 
 /* Адаптивный мобильный дизайн соло-режима */
+@media (max-width: 800px) {
+    .window-stats {
+        position: static;
+        display: block;
+        margin-top: 5px;
+        text-align: center;
+        font-size: 13px;
+        opacity: 0.9;
+    }
+}
 @media (max-width: 600px) {
     .question-text { font-size: 18px; }
     .answers-grid { grid-template-columns: 1fr; }
