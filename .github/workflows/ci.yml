@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  backend-ci:
+    name: Backend CI (Python & uv)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Проверка репозитория
+        uses: actions/checkout@v4
+
+      - name: Установка uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Установка Python 3.12
+        run: uv python install 3.12
+
+      - name: Запуск тестов бэкенда
+        run: uv run pytest
+
+  client-ci:
+    name: Client CI (Flutter)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+
+    steps:
+      - name: Проверка репозитория
+        uses: actions/checkout@v4
+
+      - name: Установка Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Установка зависимостей клиента
+        run: flutter pub get
+
+      - name: Статический анализ кода
+        run: flutter analyze
+
+      - name: Запуск тестов клиента
+        run: flutter test
+
+  # Шаблон этапа деплоя (закомментирован для будущей интеграции)
+  # deploy:
+  #   name: Deploy Application
+  #   needs: [backend-ci, client-ci]
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #   steps:
+  #     - name: Проверка репозитория
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Выполнение деплоя
+  #       run: |
+  #         echo "Запуск развертывания приложения..."
+  #         # Пример: docker compose -f docker-compose.prod.yml up -d --build

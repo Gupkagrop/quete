@@ -1,47 +1,66 @@
-# 🗺️ 70-Day Development Roadmap: Quete
+# 🗺️ План реализации (Roadmap) проекта "Quete" на 70 дней
 
-This roadmap outlines the 10-week development plan to transform Quete from a concept into a production-ready, multi-platform multiplayer game (Web, Android, iOS, Windows).
+## Описание цели
+Создание Production-Ready мультиплеерной квиз-игры с механикой блефа ("Quete") за 70 дней. Разрабатывается для Web, Android, iOS и Windows (с фокусом на Mobile-First и вертикальную ориентацию). Основная фича игры — интеграция с ИИ (Gemini API) для генерации вопросов и логики Auto-Fallback (генерация фейков за неактивных игроков).
 
-## 🏗️ Phase 1: Foundation & DevOps (Days 1-7)
-**Goal:** Establish a robust local development environment and database architecture.
-*   [ ] Docker Compose configuration (FastAPI, PostgreSQL, Redis).
-*   [ ] CI/CD pipeline setup (GitHub Actions for Python/Flutter linters).
-*   [ ] Database schema design and implementation (SQLModel).
-*   [ ] Alembic migrations setup.
-*   [ ] Basic FastAPI initialization with Self-hosted JWT Authentication endpoints.
+## 🏗️ Архитектурные решения
+- **Подход к разработке:** Вертикальная нарезка (Feature-by-Feature). Бэкенд и UI каждой фичи разрабатываются параллельно в рамках одного спринта.
+- **Инфраструктура и деплой:** VPS (Россия) + Docker Compose (PostgreSQL 16, Redis 7). Автоматический CI/CD через GitHub Actions (локальная разработка сейчас, деплой "на вырост").
+- **Backend:** Python + FastAPI + SQLModel + Alembic + Redis. Управление зависимостями через `uv`.
+- **Client (Flutter):** Стейт-менеджмент через **Riverpod** (оптимально для потоков данных от WebSockets). Маршрутизация через `go_router`. Дизайн — 8-bit ретро.
 
-## ⚙️ Phase 2: Core Game Engine & WebSockets (Days 8-21)
-**Goal:** Build the real-time multiplayer networking layer.
-*   [ ] Implement the WebSocket Connection Manager in FastAPI.
-*   [ ] Strict Pydantic typings for all WebSocket events (`join`, `leave`, `state_update`).
-*   [ ] Lobby management logic (Create room, Join with code, Kick players).
-*   [ ] Redis integration for real-time room state synchronization across clients.
+---
 
-## 🧠 Phase 3: AI Integration & Game Loop (Days 22-35)
-**Goal:** Connect Gemini API and implement the strict bluffing game logic.
-*   [ ] Gemini 1.5 Flash integration utilizing **Structured Outputs** (JSON Schema).
-*   [ ] AI Caching mechanism (Redis/Postgres) to save tokens on repeated topics.
-*   [ ] Core State Machine execution: `Lobby -> Topic -> Generate -> Bluff -> Vote -> Results`.
-*   [ ] Fallback mechanisms (Auto-fake substitution on player timeout/disconnect).
+## 📅 План по спринтам (10 недель)
 
-## 📱 Phase 4: Flutter Client - Core UX (Days 36-49)
-**Goal:** Bring the game to life visually on the client side.
-*   [ ] Flutter project initialization and routing (GoRouter).
-*   [ ] WebSocket client implementation with state management (Riverpod/Bloc).
-*   [ ] Authentication UI (Guest login) & Lobby creation/join screens.
-*   [ ] Game screens (Topic selection, typing fakes, voting grid, podium).
+### Спринт 1: Инфраструктура, Монорепозиторий и БД (День 1-7)
+- Инициализация монорепозитория (`backend/`, `client/`).
+- Настройка `docker-compose.yml` (PostgreSQL 16, Redis 7).
+- Инициализация бэкенда: `uv`, FastAPI, SQLModel, настройка миграций Alembic.
+- Создание базового скелета Flutter-приложения с Riverpod и `go_router`.
+- Настройка шаблона CI/CD пайплайна (GitHub Actions) для линтинга и тестов.
 
-## 🎨 Phase 5: Polish & Retro UI (Days 50-60)
-**Goal:** Achieve the target 8-bit retro aesthetic and game feel.
-*   [ ] Apply pixel-art styling, CRT monitor shaders, and retro fonts.
-*   [ ] Sound effects manager (BGM, UI clicks, victory/defeat sounds).
-*   [ ] Custom animations (hourglass timer, score counting, avatars).
-*   [ ] Responsive layout tuning (scaling perfectly from Mobile to Desktop).
+### Спринт 2: Фича "Авторизация и Сессии" (День 8-14)
+- **Backend:** Реализация JWT Guest Auth (генерация 6-значного кода). Redis-сессии для отслеживания онлайна.
+- **Client:** Экран входа (Welcome / Auth). Настройка провайдеров авторизации (Riverpod).
 
-## 🚀 Phase 6: Multi-platform & Production (Days 61-70)
-**Goal:** Ensure extreme stability and multi-platform compilation.
-*   [ ] End-to-end integration testing (simulating 8 concurrent players).
-*   [ ] Load testing the WebSocket server.
-*   [ ] Platform-specific compilations: Android APK and Windows EXE.
-*   [ ] Preparation for iOS compilation (Xcode setup instructions).
-*   [ ] Final bug fixes, security audit (`security-auditor`), and repository documentation.
+### Спринт 3: Фича "Лобби и WebSockets" (День 15-21)
+- **Backend:** Базовый WebSocket сервер. Управление комнатами (создать, присоединиться, передать хоста).
+- **Client:** Интеграция WebSocket клиента. Экран лобби (список игроков, бейджик хоста). Синхронизация WS-стрима с UI.
+
+### Спринт 4: Фича "Генерация вопросов ИИ" (День 22-28)
+- **Backend:** Интеграция Gemini 1.5 Flash (Structured Outputs). Кэширование вопросов в PostgreSQL. Эндпоинты выбора темы.
+- **Client:** UI выбора темы (3 случайные + кнопка "своя тема"). Обработка состояния загрузки ИИ.
+
+### Спринт 5: Игровой цикл - "Вопрос и Таймеры" (День 29-35)
+- **Backend:** State Machine игры (переход в фазу вопроса). Широковещательная рассылка вопроса и старт таймера.
+- **Client:** Экран чтения вопроса. Виджет синхронизированного таймера с анимацией.
+
+### Спринт 6: Игровой цикл - "Блеф" (День 36-42)
+- **Backend:** Прием ложных ответов. Валидация (защита от совпадений с правдой).
+- **Client:** UI ввода фейкового ответа. Экран "Ожидание остальных игроков".
+
+### Спринт 7: Краевые случаи - "Auto-Fallback" (День 43-49)
+- **Backend:** Автоматическая генерация фейков через Gemini, если игрок отключился или истекло время. Слияние одинаковых ответов от разных игроков.
+- **Client:** Плавная обработка дисконнектов/реконнектов, автоматическое восстановление состояния экрана по WS.
+
+### Спринт 8: Игровой цикл - "Голосование и Подсчет очков" (День 50-56)
+- **Backend:** Рассылка перемешанных вариантов. Сбор голосов. Начисление очков (+1000 за правду, +500 за обман соперника).
+- **Client:** UI голосования. Экран результатов раунда с анимацией начисления очков. Таблица лидеров.
+
+### Спринт 9: Полировка и 8-bit дизайн (День 57-63)
+- **Client:** Доведение до ума процедурного ретро-стиля (CustomPainter для CRT-сканлайнов, пиксельные шрифты). Адаптация под все платформы (Web, Android, iOS, Windows).
+- **Backend:** Профилирование WS. Устранение узких мест. Настройка i18n словарей.
+
+### Спринт 10: Финальный QA и Релиз (День 64-70)
+- End-to-End тестирование всего игрового цикла.
+- Полноценный деплой бэкенда на production VPS.
+- Хостинг Flutter Web-версии игры.
+- Подготовка документации и сдача проекта.
+
+---
+
+## 🛡️ Правила разработки (Verification)
+1. **Тесты:** Никаких пушей фичей без написанных автотестов (`pytest` / `flutter test`).
+2. **CI/CD Pipeline:** Автоматический запуск тестов при каждом коммите (настроен в Спринте 1).
+3. **E2E ручное тестирование:** Перед мерджем фичей с WS создается локальная сессия с 3-4 клиентами.
