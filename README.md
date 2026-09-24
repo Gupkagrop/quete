@@ -1,74 +1,213 @@
-# 🎭 Quete — Multiplayer Bluffing Quiz with AI
+# 🎭 Quete — Многопользовательская квиз-игра с блефом и ИИ
 
-> **Quete** is a real-time cross-platform multiplayer quiz game where players compete not only in knowledge, but in psychology, wit, and the art of deception. Questions and reference bluff options are dynamically generated on-the-fly using **Google Gemini 1.5 Flash**.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688.svg)](https://fastapi.tiangolo.com/)
+[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B.svg)](https://flutter.dev/)
+[![Gemini 1.5 Flash](https://img.shields.io/badge/AI-Gemini%201.5%20Flash-4285F4.svg)](https://ai.google.dev/)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791.svg)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Cache-Redis-DC382D.svg)](https://redis.io/)
 
----
-
-## 🎮 Concept & Gameplay Overview
-
-In **Quete** (derived from the French *quête* — "quest"), players face challenging trivia questions generated dynamically by AI based on chosen topics. 
-
-The game revolves around **bluffing**:
-1. **Topic Selection:** A designated player picks any topic or category.
-2. **AI Question Generation:** Gemini 1.5 Flash generates a question, the verified correct answer, and high-quality decoy answers using **Structured Outputs** (JSON Schema).
-3. **The Bluff Phase:** Each player crafts their own convincing fake answer to deceive opponents.
-4. **The Vote:** All answers (the truth + player bluffs + AI fallbacks) are shuffled together. Players try to find the truth while dodging rivals' traps.
-5. **Scoring & Podium:** Earn points for discovering the truth and for every opponent who fell for your bluff!
+> **Читать на другом языке:** [🇬🇧 English version](README_en.md)
 
 ---
 
-## ⚡ Key Game Mechanics
-
-| Mechanic | Description |
-| :--- | :--- |
-| 🤖 **AI Caching** | AI-generated questions and decoys are cached in **Redis** and **PostgreSQL** to optimize latency and conserve Gemini API quotas. |
-| 🛡️ **Bluff Integrity & Collisions** | Fakes too close or identical to the correct answer are rejected. If two players submit the exact same fake answer, they are seamlessly merged into one voting option, and both players receive bluff points if opponents vote for it. |
-| ⏱️ **Auto-Fake Fallback** | If a player disconnects or runs out of time (20–120s), an AI-generated decoy is automatically submitted on their behalf to maintain game momentum. |
-| 🔑 **Adaptive Auth** | Starts friction-free with guest lobby codes (instant play), backed by a self-hosted **JWT** architecture for persistent profiles and stat tracking. |
-| 🕹️ **8-Bit Retro Aesthetic** | Pixel-art inspired user interface, vintage arcade palettes, CRT shaders, chiptune sound effects, and animated avatars. |
+## 📖 Оглавление
+- [О проекте Quete](#-о-проекте-quete)
+- [Игровой процесс и механика блефа](#-игровой-процесс-и-механика-блефа)
+- [Ключевые возможности](#-ключевые-возможности)
+- [Стек технологий](#-стек-технологий)
+- [Архитектура и структура проекта](#-архитектура-и-структура-проекта)
+- [Быстрый старт](#-быстрый-старт)
+  - [Системные требования](#системные-требования)
+  - [Настройка бэкенда](#настройка-бэкенда)
+  - [Настройка клиента (Flutter)](#настройка-клиента-flutter)
+- [План разработки (Roadmap)](#-план-разработки-roadmap)
+- [Лицензия](#-лицензия)
 
 ---
 
-## 🛠️ Technology Stack
+## 🌟 О проекте Quete
 
-| Layer | Technologies | Role & Highlights |
+**Quete** (от французского *quête* — «поиск, квест») — кроссплатформенная party-игра в реальном времени. В отличие от стандартных викторин, где всё решает сухая эрудиция, в Quete на первый план выходят **психология, смекалка и искусство блефа**.
+
+Вопросы и реалистичные варианты-ловушки генерируются на лету искусственным интеллектом **Google Gemini 1.5 Flash** на основе выбранной игроками темы. Игроки придумывают собственные убедительные фейковые ответы, пытаясь запутать соперников и заставить их проголосовать за свою ложь.
+
+---
+
+## 🎮 Игровой процесс и механика блефа
+
+Каждый раунд проходит через несколько захватывающих этапов:
+
+```
+[ 🎯 Выбор темы ] 
+          │
+          ▼
+[ 🤖 Генерация вопроса и ловушек через Gemini 1.5 Flash ]
+          │
+          ▼
+[ ✍️ Фаза блефа: Игроки сочиняют убедительную ложь ]
+          │
+          ▼
+[ 🗳️ Голосование: Перемешивание правды, блефов игроков и ловушек ИИ ]
+          │
+          ▼
+[ 🏆 Раскрытие и подсчёт: Очки за найденную правду и обманутых соперников ]
+```
+
+1. **Выбор темы:** Хост комнаты или случайно выбранный игрок выбирает тему раунда (из предложенных или вводя произвольную).
+2. **Генерация вопроса ИИ:** Gemini 1.5 Flash формирует оригинальный вопрос, верифицированный правильный ответ и набор правдоподобных ложных ответов-ловушек с использованием строгого режима **Structured Outputs (JSON Schema)**.
+3. **Фаза блефа (The Bluff Phase):** Каждый игрок пишет собственный остроумный фейковый ответ, призванный ввести остальных в заблуждение.
+4. **Голосование (The Vote):** Все ответы (истинный ответ, ложь участников и, при необходимости, запасные варианты ИИ) перемешиваются. Игроки голосуют за тот вариант, который считают истинным.
+5. **Подсчёт очков:**
+   - **+Очки за истину:** Начисляются за выбор реального правильного ответа.
+   - **+Очки за блеф:** Начисляются за каждого оппонента, попавшегося в вашу ловушку.
+
+---
+
+## ⚡ Ключевые возможности
+
+- **Динамическая генерация через Gemini 1.5 Flash:** Каждый матч уникален. Отсутствуют повторяющиеся вопросы из статичных баз данных.
+- **Проверка честности блефа и коллизии (Bluff Integrity & Collisions):** Система отклоняет ответы, идентичные или слишком близкие к настоящему ответу. Если двое игроков независимо вводят одинаковый блеф, они объединяются в один пункт, а очки делятся поровну при голосовании оппонентов.
+- **Автоматический ИИ-фоллбэк (Auto-Fake Fallback):** При разрыве соединения или истечении таймера (20–120 сек) за игрока автоматически отправляется ложный ответ, заранее сгенерированный Gemini, поэтому темп игры никогда не проседает.
+- **Многоуровневое кэширование:** Популярные запросы и сгенерированные вопросы кэшируются в **Redis** и **PostgreSQL**, экономя квоты Google Gemini API и обеспечивая мгновенную отдачу.
+- **Адаптивная аутентификация:** Моментальный вход без регистрации по 6-значному коду лобби, с возможностью сохранения прогресса и перехода в постоянный аккаунт на базе **JWT**.
+- **8-битная ретро-стилистика:** Аркадный пиксель-арт, кинематографичные CRT-сканлайны, звуковые эффекты чиптюна и настраиваемые аватары.
+
+---
+
+## 🛠️ Стек технологий
+
+| Уровень | Технологии | Назначение и особенности |
 | :--- | :--- | :--- |
-| **Backend** | Python 3.12+, **FastAPI**, WebSockets | High-performance asynchronous API, real-time bidirectional game events. |
-| **Database & ORM** | **PostgreSQL**, **SQLModel** | Type-safe relational schema uniting SQLAlchemy 2.0 and Pydantic v2. |
-| **Cache & Real-time State** | **Redis** | Room state synchronization, session caching, and AI response cache. |
-| **Artificial Intelligence** | **Google Gemini 1.5 Flash** | Dynamic question/bluff synthesis with strict JSON Schema Structured Outputs. |
-| **Client Application** | **Flutter** (Dart 3.x) | Single codebase targeting **Web**, **Android**, **iOS**, and **Windows**. |
-| **Authentication** | Self-hosted **JWT** | Secure token-based guest sessions with migration to full accounts. |
+| **Бэкенд** | **Python 3.12+**, **FastAPI** | Асинхронный REST API и производительный WebSocket-сервер. |
+| **Реальное время** | **WebSockets** | Двунаправленная синхронизация состояния лобби и комнат с минимальной задержкой. |
+| **Искусственный интеллект** | **Google Gemini 1.5 Flash** | Синтез вопросов и ловушек со строгой валидацией по JSON Schema. |
+| **База данных и ORM** | **PostgreSQL**, **SQLModel** | Единая типобезопасная схема на базе SQLAlchemy 2.0 и Pydantic v2. |
+| **Кэш и стейт** | **Redis** | Хранение сессий, игровых таймеров и кэширование ответов нейросети. |
+| **Клиентское приложение** | **Flutter (Dart 3.x)** | Единая кодовая база для **Web**, **Android**, **iOS**, **Windows**, **macOS** и **Linux**. |
+| **Безопасность и авторизация** | **Self-hosted JWT**, Argon2 / bcrypt | Бессессионная авторизация, гостевые токены и безопасный апгрейд профиля. |
 
 ---
 
-## 📁 Repository Structure
+## 📁 Архитектура и структура проекта
 
 ```
 quete/
-├── backend/          # FastAPI backend (REST API, WebSockets, DB models, AI service)
-├── client/           # Flutter cross-platform client (Web, Mobile, Desktop)
-├── docs/             # Technical specifications, architecture designs, ROADMAP.md
-├── .agents/          # Antigravity agent configuration, MCP settings, and rule sets
-├── .artifacts/       # Architecture Decision Records (ADR) and design artifacts
-├── GEMINI.md         # Antigravity Project Constitution & engineering standards
-└── README.md         # Project overview and documentation
+├── backend/                  # Бэкенд-сервис на FastAPI
+│   ├── app/
+│   │   ├── api/              # REST эндпоинты (авторизация, комнаты, профили)
+│   │   ├── core/             # Конфигурация, подключение к БД, безопасность
+│   │   ├── models/           # Модели данных SQLModel и схемы Pydantic
+│   │   ├── services/         # Игровая логика, интеграция с Gemini, Redis менеджер
+│   │   └── websockets/       # Обработчики WebSocket-соединений и событий
+│   ├── pyproject.toml        # Конфигурация зависимостей
+│   └── tests/                # Модульные и интеграционные тесты
+│
+├── client/                   # Кроссплатформенный клиент на Flutter
+│   ├── lib/
+│   │   ├── core/             # Темы (ретро/пиксель), утилиты, сетевой слой
+│   │   ├── models/           # Модели данных Dart
+│   │   ├── providers/        # Управление состоянием (Riverpod / Bloc)
+│   │   ├── screens/          # Экраны (Лобби, Фаза блефа, Голосование, Результаты)
+│   │   └── widgets/          # Переиспользуемые пиксельные компоненты
+│   └── pubspec.yaml          # Зависимости Flutter и ассеты
+│
+├── docs/                     # Архитектурная документация и ROADMAP.md
+├── .env.example              # Пример переменных окружения
+├── README.md                 # Документация проекта (Русская версия)
+└── README_en.md              # Документация проекта (English version)
 ```
 
 ---
 
-## 🗺️ Roadmap
+## 🚀 Быстрый старт
 
-Check out the detailed [70-Day Development Roadmap](docs/ROADMAP.md) to see planned milestones across our 6 development phases:
-1. **Phase 1:** Foundation & DevOps (Days 1–7)
-2. **Phase 2:** Core Game Engine & WebSockets (Days 8–21)
-3. **Phase 3:** AI Integration & Game Loop (Days 22–35)
-4. **Phase 4:** Flutter Client - Core UX (Days 36–49)
-5. **Phase 5:** Polish & Retro UI (Days 50–60)
-6. **Phase 6:** Multi-platform & Production (Days 61–70)
+### Системные требования
+
+- **Python 3.12+**
+- **Flutter SDK 3.x+**
+- **PostgreSQL 15+**
+- **Redis 7+**
+- **Ключ Google Gemini API** ([Google AI Studio](https://aistudio.google.com/))
 
 ---
 
-## 📜 License & Acknowledgments
+### Настройка бэкенда
 
-Developed with ❤️ as a modern multiplayer experience powered by Google Gemini and Flutter.
+1. **Перейдите в директорию бэкенда:**
+   ```bash
+   cd backend
+   ```
+
+2. **Создайте и активируйте виртуальное окружение:**
+   ```bash
+   python -m venv .venv
+   # Windows (PowerShell):
+   .venv\Scripts\Activate.ps1
+   # Linux / macOS:
+   source .venv/bin/activate
+   ```
+
+3. **Установите зависимости:**
+   ```bash
+   pip install -r requirements.txt
+   # Либо используя poetry / uv
+   ```
+
+4. **Настройте переменные окружения:**
+   ```bash
+   cp ../.env.example .env
+   ```
+   Укажите актуальные значения для `GEMINI_API_KEY`, `DATABASE_URL` и `REDIS_URL`.
+
+5. **Запустите сервер разработки:**
+   ```bash
+   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   ```
+
+---
+
+### Настройка клиента (Flutter)
+
+1. **Перейдите в директорию клиента:**
+   ```bash
+   cd client
+   ```
+
+2. **Загрузите зависимости Flutter:**
+   ```bash
+   flutter pub get
+   ```
+
+3. **Запустите приложение на нужной платформе:**
+   ```bash
+   # Запуск в браузере:
+   flutter run -d chrome
+
+   # Запуск на Windows Desktop:
+   flutter run -d windows
+
+   # Запуск на подключенном мобильном устройстве:
+   flutter run
+   ```
+
+---
+
+## 🗺️ План разработки (Roadmap)
+
+Подробный график доступен в файле **[70-Day Development Roadmap](docs/ROADMAP.md)**:
+
+- 🏗️ **Фаза 1: Фундамент и DevOps (Дни 1–7)** — Настройка репозитория, окружения, базовых контейнеров и CI/CD.
+- ⚙️ **Фаза 2: Игровой движок и WebSockets (Дни 8–21)** — Жизненный цикл комнат, машина состояний, обмен событиями.
+- 🧠 **Фаза 3: Интеграция с ИИ и игровой цикл (Дни 22–35)** — Генерация через Gemini 1.5 Flash, структурированный вывод, кэш.
+- 📱 **Фаза 4: Клиент Flutter — Базовый UX (Дни 36–49)** — Адаптивная верстка, экран лобби, ввод блефа, голосование.
+- ✨ **Фаза 5: Полировка и Ретро UI (Дни 50–60)** — Пиксель-арт тема, сканлайны CRT, чиптюн аудио, анимации.
+- 🚀 **Фаза 6: Мультиплатформенность и Релиз (Дни 61–70)** — Сборки под целевые ОС, нагрузочное тестирование, деплой.
+
+---
+
+## 📜 Лицензия
+
+Проект распространяется под лицензией **MIT**.
+Открыт для изучения, совместной игры и улучшений со стороны сообщества.

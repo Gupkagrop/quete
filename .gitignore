@@ -6,6 +6,13 @@ first_start.md
 scratch/
 .repomix-output.*
 
+# Antigravity & Agent Tooling
+.agents/
+.artifacts/
+GEMINI.md
+repomix.config.json
+.repomixignore
+
 # Python
 __pycache__/
 *.py[cod]
