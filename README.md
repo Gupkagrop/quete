@@ -1,136 +1,74 @@
-# Куэте (Quete) — Ретро Онлайн-Викторина с ИИ и Блефом
+# 🎭 Quete — Multiplayer Bluffing Quiz with AI
 
-Экзаменационный проект, созданный для развлечения и временипрепровождения в компании друзей.  
-Сайт представляет собой интерактивную веб-игру с элементами блефа, где главная цель — не просто правильно ответить на вопросы, но и запутать соперников своей правдоподобной ложью.
-
----
-
-## Архитектурная концепция
-
-Название «Куэте» происходит от французского *quête* — «поиск» или «квест».  
-Игра объединяет эрудицию, психологию и современные технологии. Вопросы и варианты ответов генерируются искусственным интеллектом в реальном времени, а игроки соревнуются в умении придумывать фейки и раскусывать обман оппонентов.
-
-Интерфейс выполнен в оригинальном ретро-стиле пиксельных аркадных автоматов с уникальными 8-битными элементами, анимированными аватарами, песочными часами и медалями, что создаёт тёплую аналоговую атмосферу.
+> **Quete** is a real-time cross-platform multiplayer quiz game where players compete not only in knowledge, but in psychology, wit, and the art of deception. Questions and reference bluff options are dynamically generated on-the-fly using **Google Gemini 1.5 Flash**.
 
 ---
 
-## Ключевые технические особенности
+## 🎮 Concept & Gameplay Overview
 
-* **Игровой процесс в реальном времени:** Динамическое обновление игрового состояния и синхронизация этапов на базе технологии **Ratchet WebSockets** с бесшовным переходом на «умный» AJAX-полинг в случае отсутствия соединения.
-* **Интеграция с Groq Cloud API:** Вопросы генерируются на базе сверхбыстрой языковой модели `llama-3.1-8b-instant`.
-* **Автономный режим (AI Fallback):** В случае неполадок с API или отсутствия интернета система мгновенно переходит на локальную базу вопросов по 12 тематическим категориям.
-* **Интеллектуальный сборщик мусора:** Автоматическая транзакционная очистка неактивных лобби и связанных данных, предотвращающая переполнение базы данных.
-* **Юридическое соответствие РФ:** Полная поддержка требований ФЗ-152 (обработка персональных данных), ФЗ-436 (маркировка 18+), права на забвение (удаление аккаунта) и информирования об использовании cookie-файлов.
+In **Quete** (derived from the French *quête* — "quest"), players face challenging trivia questions generated dynamically by AI based on chosen topics. 
+
+The game revolves around **bluffing**:
+1. **Topic Selection:** A designated player picks any topic or category.
+2. **AI Question Generation:** Gemini 1.5 Flash generates a question, the verified correct answer, and high-quality decoy answers using **Structured Outputs** (JSON Schema).
+3. **The Bluff Phase:** Each player crafts their own convincing fake answer to deceive opponents.
+4. **The Vote:** All answers (the truth + player bluffs + AI fallbacks) are shuffled together. Players try to find the truth while dodging rivals' traps.
+5. **Scoring & Podium:** Earn points for discovering the truth and for every opponent who fell for your bluff!
 
 ---
 
-## Регламент игровых режимов
+## ⚡ Key Game Mechanics
 
-В проекте функционируют два принципиально разных режима игры:
+| Mechanic | Description |
+| :--- | :--- |
+| 🤖 **AI Caching** | AI-generated questions and decoys are cached in **Redis** and **PostgreSQL** to optimize latency and conserve Gemini API quotas. |
+| 🛡️ **Bluff Integrity & Collisions** | Fakes too close or identical to the correct answer are rejected. If two players submit the exact same fake answer, they are seamlessly merged into one voting option, and both players receive bluff points if opponents vote for it. |
+| ⏱️ **Auto-Fake Fallback** | If a player disconnects or runs out of time (20–120s), an AI-generated decoy is automatically submitted on their behalf to maintain game momentum. |
+| 🔑 **Adaptive Auth** | Starts friction-free with guest lobby codes (instant play), backed by a self-hosted **JWT** architecture for persistent profiles and stat tracking. |
+| 🕹️ **8-Bit Retro Aesthetic** | Pixel-art inspired user interface, vintage arcade palettes, CRT shaders, chiptune sound effects, and animated avatars. |
 
-| Параметр | Мультиплеер (Соревнование) | Соло-тесты (Одиночный) |
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technologies | Role & Highlights |
 | :--- | :--- | :--- |
-| **Количество игроков** | От 2 до 8 участников | 1 игрок (локальная сессия) |
-| **Количество раундов** | **3 раунда** | **1 раунд** (одна выбранная тема) |
-| **Вопросов в раунде** | **3 вопроса** (всего 9 за игру) | **3 вопроса** |
-| **Выбор темы** | Выбирается по очереди ответственным игроком каждого раунда | Выбирается один раз перед стартом |
-| **Статистика в БД** | Записывается в профиль (`wins_count`, `total_answers`, `correct_answers`) | **Не влияет** на статистику и рейтинг |
-| **Интерактивность** | Внутриигровой чат, голосование, выявление блефа | Ответы на вопросы с выбором из ИИ-фейков |
-| **Подсчет очков** | С множителями за раунды (**x1**, **x2**, **x3**) | Простой итоговый счет (в формате **X из 3**) |
+| **Backend** | Python 3.12+, **FastAPI**, WebSockets | High-performance asynchronous API, real-time bidirectional game events. |
+| **Database & ORM** | **PostgreSQL**, **SQLModel** | Type-safe relational schema uniting SQLAlchemy 2.0 and Pydantic v2. |
+| **Cache & Real-time State** | **Redis** | Room state synchronization, session caching, and AI response cache. |
+| **Artificial Intelligence** | **Google Gemini 1.5 Flash** | Dynamic question/bluff synthesis with strict JSON Schema Structured Outputs. |
+| **Client Application** | **Flutter** (Dart 3.x) | Single codebase targeting **Web**, **Android**, **iOS**, and **Windows**. |
+| **Authentication** | Self-hosted **JWT** | Secure token-based guest sessions with migration to full accounts. |
 
 ---
 
-## Игровая механика и начисление очков
-
-### Основной цикл мультиплеерного вопроса
-
-1. **Выбор темы:** Случайный ответственный игрок (`responsible`) задает тему. Остальные участники находятся в режиме ожидания.
-2. **Генерация вопроса:** Нейросеть мгновенно создает уникальный вопрос по теме, правильный ответ и 10 эталонных фейковых вариантов.
-3. **Ввод фейков:** Все игроки пишут свой вариант ложного ответа, стремясь запутать других участников.
-   * *Если фейк слишком близок к правильному ответу, система потребует его изменить.*
-   * *При истечении таймера (20-120 сек) игроку автоматически подставляется случайный фейк, сгенерированный ИИ.*
-4. **Голосование:** На экране отображается перемешанный список из 1 верного ответа и фейков игроков. Игрокам запрещено голосовать за собственный фейк.
-5. **Итоги:** Подсвечивается верный ответ, раскрываются авторы фейков и распределяются очки. Установлен фиксированный 10-секундный таймер перехода.
-6. **Пьедестал:** После 9 вопросов выводится топ-3 победителей с пиксельными медалями, после чего лобби переводится в режим ожидания.
-
-### Таблица начисления очков в мультиплеере
-
-* **Выбор правильного ответа:** `+10 очков × Множитель раунда`
-* **Успешный блеф** (другой игрок выбрал ваш фейк): `+5 очков за каждый голос × Множитель раунда`
-* **Множители раундов:** Раунд 1 (`x1`), Раунд 2 (`x2`), Раунд 3 (`x3`).
-
----
-
-## Инженерные решения и безопасность
-
-### 1. Защита от CSRF (Cross-Site Request Forgery)
-Все ключевые POST-формы (создание/сохранение лобби, сдача ответов, голосование, авторизация) защищены криптографически стойкими CSRF-токенами с валидацией через `hash_equals()`. Действие выхода из лобби переведено на безопасный POST-метод.
-
-### 2. Защита от XSS и инъекций
-* Имена пользователей при регистрации строго валидируются регулярным выражением (запрещены спецсимволы и HTML-теги).
-* Темы лобби, вопросы и фейки принудительно очищаются на сервере с помощью `strip_tags()`.
-* Сообщения чата очищаются на сервере и дополнительно экранируются на клиенте с помощью безопасного метода `GameWebSocketClient.escapeHtml()`.
-
-### 3. Билетная авторизация WebSockets
-Для защиты WebSocket-канала от несанкционированного доступа реализована система одноразовых билетов (`ws_ticket`). Билет генерируется при загрузке страницы, передается при установлении соединения, проверяется по БД и моментально сгорает.
-
----
-
-## Структура проекта
+## 📁 Repository Structure
 
 ```
 quete/
-├── ajax/                   # Асинхронные обработчики игрового цикла (выбор темы, фейки, голоса)
-├── assets/                 # Статические ресурсы
-│   ├── css/                # Оригинальные ретро-стили (style.css, game.css, auth.css)
-│   ├── img/                # Пиксельные 8-битные иконки, аватары, медали
-│   └── js/                 # Клиентский скрипт сокет-клиента (websocket-client.js)
-├── core/                   # Бизнес-логика ядра
-│   ├── db.php              # Слой работы с MySQL (PDO, транзакции, сборщик мусора)
-│   ├── auth_handler.php    # Обработчик авторизации и защиты от CSRF
-│   └── ai_handler.php      # [КРИТИЧЕСКИЙ] Интеграция с Groq API и оффлайн-заглушки
-├── views/                  # Повторяющиеся HTML-компоненты (шапка, подвал, чат)
-├── websocket/              # Логика реального времени
-│   ├── GameWebSocket.php   # Серверный обработчик сообщений на базе Ratchet
-│   └── server.php          # PHP-скрипт запуска демона WebSocket
-├── database.sql            # Полный SQL-дамп структуры БД, индексов и связей
-├── config.php              # Инициализация констант и загрузка переменных окружения
-├── game.php                # Основной игровой интерфейс мультиплеера
-├── solo.php                # Изолированный соло-режим викторины
-├── index.php               # Лендинг-страница и меню
-├── register.php / login.php# Формы регистрации и входа в систему
-└── .env                    # Локальные секреты проекта (БД, API ключи)
+├── backend/          # FastAPI backend (REST API, WebSockets, DB models, AI service)
+├── client/           # Flutter cross-platform client (Web, Mobile, Desktop)
+├── docs/             # Technical specifications, architecture designs, ROADMAP.md
+├── .agents/          # Antigravity agent configuration, MCP settings, and rule sets
+├── .artifacts/       # Architecture Decision Records (ADR) and design artifacts
+├── GEMINI.md         # Antigravity Project Constitution & engineering standards
+└── README.md         # Project overview and documentation
 ```
 
 ---
 
-## Быстрый старт и локальное развёртывание
+## 🗺️ Roadmap
 
-> [!NOTE]
-> Для работы проекта необходим установленный PHP версии 8.1+, Composer и СУБД MySQL.
+Check out the detailed [70-Day Development Roadmap](docs/ROADMAP.md) to see planned milestones across our 6 development phases:
+1. **Phase 1:** Foundation & DevOps (Days 1–7)
+2. **Phase 2:** Core Game Engine & WebSockets (Days 8–21)
+3. **Phase 3:** AI Integration & Game Loop (Days 22–35)
+4. **Phase 4:** Flutter Client - Core UX (Days 36–49)
+5. **Phase 5:** Polish & Retro UI (Days 50–60)
+6. **Phase 6:** Multi-platform & Production (Days 61–70)
 
-### 1. Подготовка окружения
-Сделайте копию шаблона конфигурации и укажите ваши параметры подключения к базе данных и API-ключ Groq:
-```bash
-cp .env.example .env
-```
+---
 
-### 2. Установка зависимостей
-Установите необходимые пакеты PHP (включая Ratchet для поддержки WebSockets) с помощью Composer:
-```bash
-composer install
-```
+## 📜 License & Acknowledgments
 
-### 3. Импорт базы данных
-Создайте базу данных `quete_db` в вашей СУБД MySQL и импортируйте структуру таблиц, связи и индексы из файла `database.sql`:
-```bash
-mysql -u root -p quete_db < database.sql
-```
-
-### 4. Запуск WebSocket-сервера
-Запустите фоновый демон WebSocket-сервера с помощью PHP CLI:
-```bash
-php websocket/server.php
-```
-
-После выполнения этих шагов откройте проект в браузере через ваш локальный веб-сервер (например, OpenServer или встроенный сервер PHP) и приступайте к игре!
+Developed with ❤️ as a modern multiplayer experience powered by Google Gemini and Flutter.
