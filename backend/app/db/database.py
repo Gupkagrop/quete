@@ -2,8 +2,8 @@
 
 import os
 from collections.abc import AsyncGenerator
+
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
-from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 # Конфигурация строки подключения по умолчанию

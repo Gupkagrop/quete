@@ -1,0 +1,550 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files and files not matching ignore patterns, combined into a single document by Repomix.
+The content has been processed where empty lines have been removed, line numbers have been added, content has been compressed (code blocks are separated by ⋮---- delimiter).
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: backend/**/*.py, client/lib/**/*.dart, docs/architecture/**/*.md, AGENTS.md
+- Files matching these patterns are excluded: **/__pycache__/**, **/venv/**, **/.venv/**, **/build/**, **/.dart_tool/**, scratch/**, .artifacts/**
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Empty lines have been removed from all files
+- Line numbers have been added to the beginning of each line
+- Content has been compressed - code blocks are separated by ⋮---- delimiter
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+backend/
+  alembic/
+    env.py
+  app/
+    db/
+      __init__.py
+      database.py
+    __init__.py
+    main.py
+  tests/
+    __init__.py
+    test_main.py
+client/
+  lib/
+    main.dart
+docs/
+  architecture/
+    api.md
+    database.md
+    frontend.md
+AGENTS.md
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="docs/architecture/api.md">
+# API Architecture — Quete
+
+> [!NOTE]
+> Контракты REST-эндпоинтов и WebSocket-протокол проекта Quete.
+> Актуален на Спринт 1 (скелет). Обновляется по мере добавления фич.
+
+## Base URL
+```text
+http://localhost:8000   # local dev
+https://api.quete.app  # production (планируется)
+```
+
+## REST Endpoints
+
+### Health (реализован)
+| Метод | Путь | Описание |
+|---|---|---|
+| GET | `/health` | Проверка доступности сервиса |
+
+**Response 200:**
+```json
+{
+  "status": "ok"
+}
+```
+
+### Auth (Спринт 2 — планируется)
+| Метод | Путь | Описание |
+|---|---|---|
+| POST | `/auth/guest` | Создать гостевую сессию (генерирует 6-значный код) |
+| POST | `/auth/refresh` | Обновить access-токен по refresh-токену |
+
+### Lobby (Спринт 3 — планируется)
+| Метод | Путь | Описание |
+|---|---|---|
+| POST | `/rooms` | Создать комнату |
+| POST | `/rooms/{code}/join` | Присоединиться к комнате |
+| GET | `/rooms/{code}` | Получить состояние комнаты |
+
+## Auth Flow
+
+```text
+Client -> POST /auth/guest
+Server -> {access_token, refresh_token, player_id, nickname, room_code}
+Client -> Authorization: Bearer <access_token>
+```
+
+- `access_token`: JWT, TTL = 60 мин.
+- `refresh_token`: Opaque token, TTL = 30 дней, хранится в Redis.
+
+## WebSocket Protocol
+
+**Подключение:** `ws://localhost:8000/ws/{room_code}?token={access_token}`
+
+### Envelope формат (строго соблюдать)
+```json
+{
+  "type": "<event_type>",
+  "payload": {}
+}
+```
+
+### Типы событий (планируются)
+| Type | Направление | Описание |
+|---|---|---|
+| `player_joined` | Server->Client | Новый игрок вошёл в лобби |
+| `player_left` | Server->Client | Игрок отключился |
+| `game_started` | Server->Client | Хост запустил игру |
+| `question` | Server->Client | Новый вопрос раунда |
+| `submit_bluff` | Client->Server | Игрок отправил фейковый ответ |
+| `vote` | Client->Server | Игрок проголосовал |
+| `round_result` | Server->Client | Итоги раунда + очки |
+
+## Error Responses
+
+Все ошибки возвращают стандартный формат:
+```json
+{
+  "detail": "Описание ошибки"
+}
+```
+HTTP-коды: 400 (валидация), 401 (не авторизован), 403 (нет доступа), 404, 422, 500.
+</file>
+
+<file path="docs/architecture/database.md">
+# Database Architecture — Quete
+
+> [!NOTE]
+> Схемы таблиц PostgreSQL, индексы, связи и политика миграций Alembic.
+> Актуален на Спринт 1 (скелет). Обновляется по мере добавления фич.
+
+## Схема базы данных
+
+### Текущий статус
+Спринт 1 завершён. Таблицы будут добавляться начиная со Спринта 2.
+
+### Таблицы (планируются)
+
+```text
+players           — учётные записи гостевых игроков (JWT Guest Auth)
+game_rooms        — лобби / игровые комнаты
+game_sessions     — активные игровые сессии (State Machine)
+rounds            — раунды внутри сессии
+questions         — кэш сгенерированных ИИ вопросов
+bluff_answers     — ответы-фейки от игроков и AI Auto-Fallback
+votes             — голоса игроков в раунде
+```
+
+## Соглашения
+
+- Все первичные ключи — UUID (генерация на стороне БД).
+- Все таблицы имеют поля `created_at TIMESTAMPTZ` и `updated_at TIMESTAMPTZ`.
+- Внешние ключи — с `ON DELETE CASCADE`, если дочерняя запись не имеет смысла без родителя.
+- Индексы создаются явно в миграциях Alembic.
+
+## Migrations Policy
+
+- Каждая миграция — один атомарный изменяемый объект.
+- Команда создания: `uv run alembic revision --autogenerate -m "описание изменения"`
+- Применение миграций: `uv run alembic upgrade head`
+- **ЗАПРЕЩЕНО** редактировать уже применённые миграции. Только новые ревизии.
+
+## Redis (Сессии)
+
+- `session:{player_id}` — онлайн-статус игрока. TTL: 30 сек (heartbeat).
+- `room:{room_code}:players` — список игроков в лобби (Set).
+- `question_cache:{topic}` — кэш вопросов от Gemini. TTL: 24 часа.
+</file>
+
+<file path="docs/architecture/frontend.md">
+# Frontend Architecture — Quete
+
+> [!NOTE]
+> Дизайн-система, роутинг и управление состоянием Flutter-клиента Quete.
+> Актуален на Спринт 1 (скелет). Обновляется по мере добавления фич.
+
+## Платформы
+- **Web** (основной деплой, Mobile-First, вертикальная ориентация)
+- **Android / iOS**
+- **Windows** (Desktop)
+
+## Tech Stack
+| Инструмент | Версия | Назначение |
+|---|---|---|
+| Flutter | 3.x+ | UI фреймворк |
+| `flutter_riverpod` | ^3.4.3 | Стейт-менеджмент |
+| `go_router` | ^18.0.1 | Навигация |
+
+## Структура директорий
+
+```text
+client/lib/
+├── core/
+│   ├── network/      # HTTP-клиент, перехватчики токенов
+│   ├── websocket/    # WebSocket-сервис, reconnect логика
+│   ├── storage/      # Хранилище токенов (shared_preferences)
+│   └── theme/        # Ретро-тема, пиксельные шрифты, цвета
+├── models/           # Dart data models (fromJson/toJson, строгая типизация)
+├── state/            # Riverpod providers и AsyncNotifiers
+└── ui/
+    ├── screens/
+    │   ├── auth/     # Welcome / Guest Auth экран (Спринт 2)
+    │   ├── menu/     # Главное меню
+    │   ├── lobby/    # Лобби + список игроков (Спринт 3)
+    │   ├── game/     # Игровой цикл (Спринты 5–8)
+    │   └── result/   # Таблица лидеров (Спринт 8)
+    └── widgets/      # Переиспользуемые компоненты
+        ├── retro_button.dart
+        ├── pixel_timer.dart
+        └── answer_card.dart
+```
+
+## Routing (`go_router`)
+
+- **Guard:** Если нет сохранённого токена -> redirect на `/auth`.
+- **Маршруты:**
+
+| Путь | Экран |
+|---|---|
+| `/auth` | Экран гостевой авторизации |
+| `/` | Главное меню |
+| `/lobby/:code` | Лобби комнаты |
+| `/game/:code` | Игровой экран |
+| `/result/:code` | Результаты |
+
+## State Management (Riverpod)
+
+- **`authProvider`** — текущий игрок + JWT-токены. `AsyncNotifierProvider`.
+- **`roomProvider`** — состояние лобби. Подписывается на WebSocket-стрим.
+- **`gameProvider`** — State Machine игрового цикла. Обрабатывает события раунда.
+
+## Design System (8-bit Retro)
+
+- **Шрифты:** Пиксельные (Press Start 2P или аналог).
+- **Цвета:** Тёмный фон (`#0D0D0D`) + неоновые акценты (зелёный `#00FF41`, пурпурный `#FF00FF`).
+- **Компоненты:** Резкие границы без скруглений, пиксельные тени, ASCII-арт декор.
+- **Анимация:** CustomPainter — CRT-сканлайны, мигающие курсоры.
+- **Адаптивность:** `LayoutBuilder` + `MediaQuery`. Mobile-first breakpoint: 600px.
+
+## WebSocket Client Rules
+
+1. Подключение при входе в лобби (`/lobby/:code`).
+2. Exponential backoff при реконнекте: 1s -> 2s -> 4s -> 8s -> max 30s.
+3. Все входящие события типизированы через Dart-модели (никакого raw dynamic).
+4. Отключение — через `dispose()` при unmount экрана.
+</file>
+
+<file path="AGENTS.md">
+# AGENTS.md — Паспорт проекта Quete
+
+> [!NOTE]
+> Этот документ — единая точка входа и паспорт проекта для любого ИИ-агента (стандарт сентября 2026 года).
+> Содержит актуальный стек, команды сборки, правила чистого кода, архитектурные ограничения и запрещённые паттерны.
+> Обязателен к ознакомлению перед выполнением любых задач в репозитории Quete.
+
+## 1. Tech Stack
+
+| Слой | Технология | Детали |
+|---|---|---|
+| **Backend** | Python 3.12+, FastAPI | Полностью асинхронный (async/await), Pydantic v2 |
+| **ORM / DB** | SQLModel + PostgreSQL 16 | Асинхронный драйвер asyncpg, SQLAlchemy 2.0 async |
+| **Кэш / Сессии** | Redis 7 | Онлайн игроков, heartbeat, временный кэш вопросов |
+| **Миграции** | Alembic | Управление схемой реляционной БД |
+| **Пакетный менеджер Backend** | uv | Использовать исключительно `uv` (НЕ pip, НЕ poetry) |
+| **Frontend** | Flutter / Dart 3.x+ | Mobile-First, кроссплатформенность (Web, Android, iOS, Windows) |
+| **State Management** | Riverpod (`flutter_riverpod ^3.4.3`) | AsyncNotifier, без setState в бизнес-логике |
+| **Роутинг** | `go_router ^18.0.1` | Декларативный роутинг, auth guards |
+| **ИИ Интеграция** | Google Gemini 1.5 Flash | Режим Structured Outputs (Pydantic-схемы) |
+| **Авторизация** | Self-hosted JWT | Guest Auth (6-значный код комнаты/сессии) |
+| **Realtime-связь** | WebSockets | FastAPI WebSockets + Flutter WebSocket channel |
+| **Инфраструктура** | Docker Compose | Локальный запуск PostgreSQL 16 и Redis 7 |
+| **CI/CD** | GitHub Actions | Автоматический линтинг и тесты для ветки `dev` |
+
+## 2. Commands
+
+### Backend (`backend/`)
+```bash
+# Установка и синхронизация зависимостей
+uv sync
+
+# Запуск локального dev-сервера FastAPI
+uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Статический анализ и проверка форматирования
+uv run ruff check .
+
+# Запуск тестов pytest
+uv run pytest
+
+# Создание и применение миграций Alembic
+uv run alembic revision --autogenerate -m "описание_миграции"
+uv run alembic upgrade head
+```
+
+### Frontend (`client/`)
+```bash
+# Получение зависимостей
+flutter pub get
+
+# Статический анализ Dart кода
+flutter analyze
+
+# Запуск сьюта тестов виджетов и логики
+flutter test
+
+# Запуск Web-версии в режиме разработки
+flutter run -d chrome
+```
+
+### Инфраструктура (Корень репозитория)
+```bash
+# Запуск контейнеров БД и Redis в фоне
+docker compose up -d
+
+# Остановка контейнеров с сохранением томов данных
+docker compose down
+```
+
+### AST-карта кодовой базы (Уровень 2)
+```bash
+# Генерация файла repomix-output.xml через cmd.exe на Windows
+cmd.exe /c npx repomix
+```
+
+## 3. Code Standards
+
+- **Ранние возвраты (Early Returns):** Максимальная глубина вложенности блоков — не более 3 уровней. Плоские функции с быстрыми проверками краевых условий.
+- **Размер функций:** Не более 30–40 строк кода. Если логика шире — декомпозировать на вспомогательные функции.
+- **Строгая типизация:** Полный запрет на `any`, неявные `dynamic` и нетипизированные параметры. Все аргументы и возвращаемые значения строго аннотированы.
+- **Запрет на заглушки:** Никаких `// TODO`, `pass` в качестве постоянной логики, нереализованных заглушек или временных моков в production-коде.
+- **Язык идентификаторов:** Имена переменных, функций, классов, модулей, таблиц БД — строго на английском языке (`camelCase` / `snake_case` по стандарту языка).
+- **Язык комментариев:** Docstrings, поясняющие комментарии и сообщения коммитов Git — строго на русском языке.
+- **Git-коммиты:** Формат Conventional Commits на русском языке: `feat: ...`, `fix: ...`, `chore: ...`, `refactor: ...`, `test: ...`.
+
+## 4. Architecture Rules
+
+### Backend
+- Все операции ввода-вывода (БД, Redis, HTTP, WebSocket) выполняются строго через `async/await`.
+- Внедрение зависимостей сессий БД и пользователя только через `fastapi.Depends`.
+- Все ответы Gemini парсятся строго через Structured Outputs с Pydantic; ручной строковый парсинг запрещён.
+- Секреты и конфигурации считываются только из переменных окружения через `pydantic-settings` или `.env`.
+
+### Frontend
+- Бизнес-логика и хранение данных выносятся в Riverpod провайдеры (`NotifierProvider`, `AsyncNotifierProvider`).
+- Навигация организована через `go_router` с централизованными guard-редиректами по статусу авторизации.
+- Обработка сбоев сети и WebSocket должна включать стратегию повторов с экспоненциальной задержкой (Exponential Backoff).
+- Ретро-дизайн 8-bit реализуется процедурно через CustomPainter, стилизованные шрифты и цветовую палитру без тяжелых растровых ассетов на ранних этапах.
+
+### Структура директорий
+```text
+quete/
+├── backend/app/
+│   ├── api/          # REST-роутеры и эндпоинты
+│   ├── core/         # settings, JWT, логгер
+│   ├── db/           # engine, session, base models
+│   ├── models/       # SQLModel сущности
+│   ├── schemas/      # Pydantic DTO (запросы/ответы)
+│   ├── services/     # Бизнес-логика (AI, лобби, очки)
+│   ├── websockets/   # ConnectionManager, обработчики событий
+│   └── main.py
+└── client/lib/
+    ├── core/         # HTTP-клиент, WS-сервис, токены, темы
+    ├── models/       # Dart data models (fromJson/toJson)
+    ├── state/        # Riverpod providers и notifiers
+    └── ui/
+        ├── screens/  # Auth, Menu, Lobby, Game, Leaderboard
+        ├── widgets/  # Ретро-кнопки, таймеры, карточки
+        └── theme/    # Цвета, шрифты, стили пиксель-арта
+```
+
+### Архитектурная документация (Уровень 3)
+- [docs/architecture/database.md](docs/architecture/database.md) — схема сущностей PostgreSQL, связи, индексы и миграции.
+- [docs/architecture/api.md](docs/architecture/api.md) — спецификация REST API, auth flow и WebSocket envelope протокол.
+- [docs/architecture/frontend.md](docs/architecture/frontend.md) — архитектура слоёв Flutter, Riverpod стейт и дизайн-система.
+
+## 5. Prohibited Patterns
+
+| Запрещённый паттерн | Причина и регламент |
+|---|---|
+| Неконтролируемые деструктивные SQL-запросы (`DROP TABLE`, `TRUNCATE`, `DELETE` без фильтра) | Требует обязательного подтверждения пользователя |
+| Форсированные операции Git (`git push --force`, `git reset --hard`) | Риск необратимой потери кода |
+| Hardcoded секреты (API-ключи, JWT secrets, пароли БД) | Грубое нарушение безопасности |
+| Использование `any` в TypeScript/Python или `dynamic` без нужды в Dart | Нарушение контракта строгой типизации |
+| Незавершённые заглушки (`// TODO`, пустые заглушки) | Нарушение стандарта готового кода |
+| Несогласованное добавление тяжёлых сторонних библиотек | Нарушение принципа YAGNI |
+
+## 6. Testing Policy
+
+- Каждая фича или багфикс сопровождается юнит-тестами (`pytest` для бэкенда, `flutter test` для клиента).
+- Внешние вызовы к сторонним API (Gemini API) в тестах изолируются через моки.
+- Тесты запускаются локально перед каждым коммитом и автоматически валидируются в GitHub Actions CI.
+</file>
+
+<file path="backend/alembic/env.py">
+"""Окружение для выполнения миграций Alembic с поддержкой SQLModel и AsyncEngine."""
+⋮----
+# Объект конфигурации Alembic из alembic.ini
+config = context.config
+⋮----
+# Настройка логирования на основе конфигурационного файла
+⋮----
+# Установка URL подключения из конфигурации приложения
+⋮----
+# Метаданные моделей SQLModel для отслеживания схемы и автогенерации миграций
+target_metadata = SQLModel.metadata
+⋮----
+def run_migrations_offline() -> None
+⋮----
+"""Запуск миграций в offline-режиме (генерация SQL-скрипта без подключения к БД)."""
+url: str | None = config.get_main_option("sqlalchemy.url")
+⋮----
+def do_run_migrations(connection: Connection) -> None
+⋮----
+"""Применение миграций с использованием переданного соединения."""
+⋮----
+async def run_async_migrations() -> None
+⋮----
+"""Создание асинхронного движка и выполнение миграций."""
+connectable = async_engine_from_config(
+⋮----
+def run_migrations_online() -> None
+⋮----
+"""Запуск миграций в online-режиме с асинхронным подключением."""
+</file>
+
+<file path="backend/app/db/__init__.py">
+"""Пакет базы данных и моделей Quete."""
+</file>
+
+<file path="backend/app/db/database.py">
+"""Модуль подключения к базе данных с использованием SQLModel и AsyncEngine."""
+⋮----
+# Конфигурация строки подключения по умолчанию
+DEFAULT_DATABASE_URL: str = (
+⋮----
+# Чтение строки подключения из переменных окружения
+DATABASE_URL: str = os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL)
+⋮----
+# Инициализация асинхронного движка базы данных
+engine: AsyncEngine = create_async_engine(
+⋮----
+# Фабрика асинхронных сессий
+async_session_maker: async_sessionmaker[AsyncSession] = async_sessionmaker(
+⋮----
+async def get_session() -> AsyncGenerator[AsyncSession, None]
+⋮----
+"""Генератор асинхронных сессий для внедрения зависимостей в FastAPI."""
+</file>
+
+<file path="backend/app/__init__.py">
+"""Пакет бэкенд-приложения Quete."""
+</file>
+
+<file path="backend/app/main.py">
+"""Основной модуль веб-приложения FastAPI."""
+⋮----
+class HealthResponse(BaseModel)
+⋮----
+"""Схема ответа для эндпоинта проверки работоспособности сервиса."""
+⋮----
+status: str = Field(description="Статус доступности сервиса")
+⋮----
+app: FastAPI = FastAPI(
+⋮----
+async def health_check() -> HealthResponse
+⋮----
+"""Возвращает текущий статус доступности сервиса."""
+</file>
+
+<file path="backend/tests/__init__.py">
+"""Пакет тестов бэкенда."""
+</file>
+
+<file path="backend/tests/test_main.py">
+"""Тесты для основных эндпоинтов приложения FastAPI."""
+⋮----
+@pytest.fixture
+def client() -> TestClient
+⋮----
+"""Фикстура тестового клиента FastAPI."""
+⋮----
+def test_health_check(client: TestClient) -> None
+⋮----
+"""Проверка доступности и корректного ответа эндпоинта /health."""
+response = client.get("/health")
+⋮----
+# Проверяем успешный HTTP-статус ответа (200 OK)
+⋮----
+# Проверяем структуру и полезную нагрузку JSON-ответа
+data = response.json()
+</file>
+
+<file path="client/lib/main.dart">
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+⋮----
+void main() {
+// Оборачиваем корневой виджет в ProviderScope для работы с состоянием Riverpod
+⋮----
+class MyApp extends StatelessWidget {
+const MyApp({super.key});
+⋮----
+Widget build(BuildContext context) {
+⋮----
+class MyHomePage extends StatefulWidget {
+const MyHomePage({super.key, required this.title});
+⋮----
+State<MyHomePage> createState() => _MyHomePageState();
+⋮----
+class _MyHomePageState extends State<MyHomePage> {
+⋮----
+void _incrementCounter() {
+</file>
+
+</files>

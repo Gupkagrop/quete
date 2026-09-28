@@ -1,10 +1,10 @@
-name: CI
+﻿name: CI
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [ main, master, dev, develop ]
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [ main, master, dev, develop ]
 
 jobs:
   backend-ci:
@@ -15,19 +15,19 @@ jobs:
         working-directory: backend
 
     steps:
-      - name: Проверка репозитория
+      - name: РџСЂРѕРІРµСЂРєР° СЂРµРїРѕР·РёС‚РѕСЂРёСЏ
         uses: actions/checkout@v4
 
-      - name: Установка uv
+      - name: РЈСЃС‚Р°РЅРѕРІРєР° uv
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
           version: "latest"
 
-      - name: Установка Python 3.12
+      - name: РЈСЃС‚Р°РЅРѕРІРєР° Python 3.12
         run: uv python install 3.12
 
-      - name: Запуск тестов бэкенда
+      - name: Р—Р°РїСѓСЃРє С‚РµСЃС‚РѕРІ Р±СЌРєРµРЅРґР°
         run: uv run pytest
 
   client-ci:
@@ -38,35 +38,36 @@ jobs:
         working-directory: client
 
     steps:
-      - name: Проверка репозитория
+      - name: РџСЂРѕРІРµСЂРєР° СЂРµРїРѕР·РёС‚РѕСЂРёСЏ
         uses: actions/checkout@v4
 
-      - name: Установка Flutter SDK
+      - name: РЈСЃС‚Р°РЅРѕРІРєР° Flutter SDK
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
-      - name: Установка зависимостей клиента
+      - name: РЈСЃС‚Р°РЅРѕРІРєР° Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РєР»РёРµРЅС‚Р°
         run: flutter pub get
 
-      - name: Статический анализ кода
+      - name: РЎС‚Р°С‚РёС‡РµСЃРєРёР№ Р°РЅР°Р»РёР· РєРѕРґР°
         run: flutter analyze
 
-      - name: Запуск тестов клиента
+      - name: Р—Р°РїСѓСЃРє С‚РµСЃС‚РѕРІ РєР»РёРµРЅС‚Р°
         run: flutter test
 
-  # Шаблон этапа деплоя (закомментирован для будущей интеграции)
+  # РЁР°Р±Р»РѕРЅ СЌС‚Р°РїР° РґРµРїР»РѕСЏ (Р·Р°РєРѕРјРјРµРЅС‚РёСЂРѕРІР°РЅ РґР»СЏ Р±СѓРґСѓС‰РµР№ РёРЅС‚РµРіСЂР°С†РёРё)
   # deploy:
   #   name: Deploy Application
   #   needs: [backend-ci, client-ci]
   #   runs-on: ubuntu-latest
   #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
   #   steps:
-  #     - name: Проверка репозитория
+  #     - name: РџСЂРѕРІРµСЂРєР° СЂРµРїРѕР·РёС‚РѕСЂРёСЏ
   #       uses: actions/checkout@v4
   #
-  #     - name: Выполнение деплоя
+  #     - name: Р’С‹РїРѕР»РЅРµРЅРёРµ РґРµРїР»РѕСЏ
   #       run: |
-  #         echo "Запуск развертывания приложения..."
-  #         # Пример: docker compose -f docker-compose.prod.yml up -d --build
+  #         echo "Р—Р°РїСѓСЃРє СЂР°Р·РІРµСЂС‚С‹РІР°РЅРёСЏ РїСЂРёР»РѕР¶РµРЅРёСЏ..."
+  #         # РџСЂРёРјРµСЂ: docker compose -f docker-compose.prod.yml up -d --build
+
