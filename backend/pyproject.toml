@@ -20,6 +20,7 @@ package = false
 
 [dependency-groups]
 dev = [
+    "pytest-asyncio>=1.4.0",
     "ruff>=0.16.9",
 ]
 

@@ -72,6 +72,107 @@ AGENTS.md
 <files>
 This section contains the contents of the repository's files.
 
+<file path="backend/alembic/env.py">
+"""Окружение для выполнения миграций Alembic с поддержкой SQLModel и AsyncEngine."""
+⋮----
+# Объект конфигурации Alembic из alembic.ini
+config = context.config
+⋮----
+# Настройка логирования на основе конфигурационного файла
+⋮----
+# Установка URL подключения из конфигурации приложения
+⋮----
+# Метаданные моделей SQLModel для отслеживания схемы и автогенерации миграций
+target_metadata = SQLModel.metadata
+⋮----
+def run_migrations_offline() -> None
+⋮----
+"""Запуск миграций в offline-режиме (генерация SQL-скрипта без подключения к БД)."""
+url: str | None = config.get_main_option("sqlalchemy.url")
+⋮----
+def do_run_migrations(connection: Connection) -> None
+⋮----
+"""Применение миграций с использованием переданного соединения."""
+⋮----
+async def run_async_migrations() -> None
+⋮----
+"""Создание асинхронного движка и выполнение миграций."""
+connectable = async_engine_from_config(
+⋮----
+def run_migrations_online() -> None
+⋮----
+"""Запуск миграций в online-режиме с асинхронным подключением."""
+</file>
+
+<file path="backend/app/db/__init__.py">
+"""Пакет базы данных и моделей Quete."""
+</file>
+
+<file path="backend/app/__init__.py">
+"""Пакет бэкенд-приложения Quete."""
+</file>
+
+<file path="backend/app/main.py">
+"""Основной модуль веб-приложения FastAPI."""
+⋮----
+class HealthResponse(BaseModel)
+⋮----
+"""Схема ответа для эндпоинта проверки работоспособности сервиса."""
+⋮----
+status: str = Field(description="Статус доступности сервиса")
+⋮----
+app: FastAPI = FastAPI(
+⋮----
+async def health_check() -> HealthResponse
+⋮----
+"""Возвращает текущий статус доступности сервиса."""
+</file>
+
+<file path="backend/tests/__init__.py">
+"""Пакет тестов бэкенда."""
+</file>
+
+<file path="backend/tests/test_main.py">
+"""Тесты для основных эндпоинтов приложения FastAPI."""
+⋮----
+@pytest.fixture
+def client() -> TestClient
+⋮----
+"""Фикстура тестового клиента FastAPI."""
+⋮----
+def test_health_check(client: TestClient) -> None
+⋮----
+"""Проверка доступности и корректного ответа эндпоинта /health."""
+response = client.get("/health")
+⋮----
+# Проверяем успешный HTTP-статус ответа (200 OK)
+⋮----
+# Проверяем структуру и полезную нагрузку JSON-ответа
+data = response.json()
+</file>
+
+<file path="client/lib/main.dart">
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+⋮----
+void main() {
+// Оборачиваем корневой виджет в ProviderScope для работы с состоянием Riverpod
+⋮----
+class MyApp extends StatelessWidget {
+const MyApp({super.key});
+⋮----
+Widget build(BuildContext context) {
+⋮----
+class MyHomePage extends StatefulWidget {
+const MyHomePage({super.key, required this.title});
+⋮----
+State<MyHomePage> createState() => _MyHomePageState();
+⋮----
+class _MyHomePageState extends State<MyHomePage> {
+⋮----
+void _incrementCounter() {
+</file>
+
 <file path="docs/architecture/api.md">
 # API Architecture — Quete
 
@@ -426,42 +527,6 @@ quete/
 - Тесты запускаются локально перед каждым коммитом и автоматически валидируются в GitHub Actions CI.
 </file>
 
-<file path="backend/alembic/env.py">
-"""Окружение для выполнения миграций Alembic с поддержкой SQLModel и AsyncEngine."""
-⋮----
-# Объект конфигурации Alembic из alembic.ini
-config = context.config
-⋮----
-# Настройка логирования на основе конфигурационного файла
-⋮----
-# Установка URL подключения из конфигурации приложения
-⋮----
-# Метаданные моделей SQLModel для отслеживания схемы и автогенерации миграций
-target_metadata = SQLModel.metadata
-⋮----
-def run_migrations_offline() -> None
-⋮----
-"""Запуск миграций в offline-режиме (генерация SQL-скрипта без подключения к БД)."""
-url: str | None = config.get_main_option("sqlalchemy.url")
-⋮----
-def do_run_migrations(connection: Connection) -> None
-⋮----
-"""Применение миграций с использованием переданного соединения."""
-⋮----
-async def run_async_migrations() -> None
-⋮----
-"""Создание асинхронного движка и выполнение миграций."""
-connectable = async_engine_from_config(
-⋮----
-def run_migrations_online() -> None
-⋮----
-"""Запуск миграций в online-режиме с асинхронным подключением."""
-</file>
-
-<file path="backend/app/db/__init__.py">
-"""Пакет базы данных и моделей Quete."""
-</file>
-
 <file path="backend/app/db/database.py">
 """Модуль подключения к базе данных с использованием SQLModel и AsyncEngine."""
 ⋮----
@@ -480,71 +545,6 @@ async_session_maker: async_sessionmaker[AsyncSession] = async_sessionmaker(
 async def get_session() -> AsyncGenerator[AsyncSession, None]
 ⋮----
 """Генератор асинхронных сессий для внедрения зависимостей в FastAPI."""
-</file>
-
-<file path="backend/app/__init__.py">
-"""Пакет бэкенд-приложения Quete."""
-</file>
-
-<file path="backend/app/main.py">
-"""Основной модуль веб-приложения FastAPI."""
-⋮----
-class HealthResponse(BaseModel)
-⋮----
-"""Схема ответа для эндпоинта проверки работоспособности сервиса."""
-⋮----
-status: str = Field(description="Статус доступности сервиса")
-⋮----
-app: FastAPI = FastAPI(
-⋮----
-async def health_check() -> HealthResponse
-⋮----
-"""Возвращает текущий статус доступности сервиса."""
-</file>
-
-<file path="backend/tests/__init__.py">
-"""Пакет тестов бэкенда."""
-</file>
-
-<file path="backend/tests/test_main.py">
-"""Тесты для основных эндпоинтов приложения FastAPI."""
-⋮----
-@pytest.fixture
-def client() -> TestClient
-⋮----
-"""Фикстура тестового клиента FastAPI."""
-⋮----
-def test_health_check(client: TestClient) -> None
-⋮----
-"""Проверка доступности и корректного ответа эндпоинта /health."""
-response = client.get("/health")
-⋮----
-# Проверяем успешный HTTP-статус ответа (200 OK)
-⋮----
-# Проверяем структуру и полезную нагрузку JSON-ответа
-data = response.json()
-</file>
-
-<file path="client/lib/main.dart">
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-⋮----
-void main() {
-// Оборачиваем корневой виджет в ProviderScope для работы с состоянием Riverpod
-⋮----
-class MyApp extends StatelessWidget {
-const MyApp({super.key});
-⋮----
-Widget build(BuildContext context) {
-⋮----
-class MyHomePage extends StatefulWidget {
-const MyHomePage({super.key, required this.title});
-⋮----
-State<MyHomePage> createState() => _MyHomePageState();
-⋮----
-class _MyHomePageState extends State<MyHomePage> {
-⋮----
-void _incrementCounter() {
 </file>
 
 </files>
