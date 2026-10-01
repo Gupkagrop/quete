@@ -1,22 +1,55 @@
----
+﻿---
 request_feedback: true
 user_facing: true
 ---
 
-# Спринт 4: Фича "Генерация вопросов ИИ" (День 22-28)
+# Спринт 4: Фича «Генерация вопросов ИИ» (День 22–28)
 
 ## Goal Description
-Цель этого спринта — реализовать фичу "Фича "Генерация вопросов ИИ" (День 22-28)". Мы будем работать вертикально: разрабатывать бэкенд и фронтенд параллельно.
+Цель четвёртого спринта — внедрить интеграцию с Google Gemini 1.5 Flash для генерации вопросов викторины со строгой валидацией по JSON Schema (Structured Outputs), кэшированием для экономии квот и интерфейсом выбора темы игры.
 
-## User Review Required
-Нет критических изменений, требующих предварительного ревью перед стартом спринта, помимо стандартной логики.
+---
 
-## Proposed Changes
-Ниже описаны задачи для выполнения в этом спринте:
+## 1. Архитектурные решения
 
-- **Backend:** Интеграция Gemini 1.5 Flash (Structured Outputs). Кэширование вопросов в PostgreSQL. Эндпоинты выбора темы.
-- **Client:** UI выбора темы (3 случайные + кнопка "своя тема"). Обработка состояния загрузки ИИ.
+### 1.1 Схема Structured Outputs (Pydantic)
+Все вызовы Gemini API используют режим Structured Outputs с Pydantic-моделью:
+```python
+class GeneratedQuestion(BaseModel):
+    text: str = Field(description="Текст интересного и нетривиального вопроса")
+    correct_answer: str = Field(description="Краткий и точный правильный ответ")
+    decoy_fallbacks: list[str] = Field(
+        description="2-3 правдоподобных ложных ответа для Auto-Fallback механизма",
+        min_length=2,
+        max_length=3,
+    )
+    explanation: str = Field(description="Краткий исторический/научный факт с пояснением")
+```
 
-## Verification Plan
-1. **Автотесты:** Проверка успешности `pytest` и `flutter test`.
-2. **Интеграция:** Локальный запуск `docker-compose`, бэкенда и фронтенда, ручная проверка фичи.
+### 1.2 Двухуровневое кэширование
+1. **Redis:** `question_cache:{normalized_topic}` (быстрая отдача, TTL 24 ч).
+2. **PostgreSQL:** таблица `questions` (долговременное хранение пула сгенерированных вопросов).
+
+### 1.3 Механика выбора темы
+- Хосту (или игрокам по очереди) предлагаются 3 случайные готовые темы дня + опция «Своя тема» со свободным вводом (до 40 символов).
+
+---
+
+## 2. Предлагаемые изменения по файлам
+
+### Backend (`backend/`)
+- Добавить `google-genai>=0.1.1` в `pyproject.toml`.
+- `app/services/ai_service.py`: класс `GeminiQuestionService` для отправки структурированных промптов и работы с кэшем.
+- `app/models/question.py`: SQLModel таблица `questions`.
+- `app/api/questions.py`: эндпоинты `GET /topics/suggestions` (3 темы дня) и `POST /questions/generate` (генерация по теме).
+
+### Client (`client/`)
+- `ui/screens/lobby/widgets/topic_picker_dialog.dart`: ретро-окно выбора темы с 3 карточками и полем для ввода своей темы.
+- `ui/widgets/pixel_loading_indicator.dart`: процедурная 8-bit анимация загрузки («ИИ генерирует вопрос...»).
+- `state/question_provider.dart`: Riverpod провайдер управления темами и генерацией.
+
+---
+
+## 3. План верификации
+- **Pytest:** строгие моки `google-genai` через `unittest.mock`, проверка валидации Structured Outputs, проверка отдачи из кэша.
+- **Flutter test:** виджет-тест диалога выбора темы и состояния индикатора загрузки.
