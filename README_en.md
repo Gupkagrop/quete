@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://github.com/Gupkagrop/quete/actions"><img src="https://img.shields.io/badge/CI%2FCD-Passing-00FF41?style=for-the-badge&logo=githubactions&logoColor=black" alt="CI/CD Status" /></a>
   <a href="docs/ROADMAP.md"><img src="https://img.shields.io/badge/Roadmap-Sprint%202%20Done-FF00FF?style=for-the-badge&logo=target&logoColor=white" alt="Sprint Progress" /></a>
-  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License: MIT" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-PolyForm%20Noncommercial-FF5722?style=for-the-badge&logo=shield&logoColor=white" alt="License: Noncommercial" /></a>
 </p>
 
 <p align="center">
@@ -309,5 +309,9 @@ quete/
 
 ## 📜 License
 
-Distributed under the **MIT License**.
+Distributed under the **[PolyForm Noncommercial License 1.0.0](LICENSE)**.
+
+* ✅ **Permitted:** Free personal usage, casual party play with friends, academic research, architectural study, and non-commercial forks.
+* 🚫 **Prohibited:** Any commercial use, paid SaaS hosting, distributing via commercial app stores (App Store, Google Play, Steam), or monetization without explicit prior written authorization from the copyright holder.
+
 Crafted with ❤️ for lovers of retro arcade games and clever deception.
