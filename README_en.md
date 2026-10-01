@@ -1,212 +1,313 @@
-# 🎭 Quete — Multiplayer Bluffing Quiz with AI
+<p align="center">
+  <img src="docs/assets/banner.png" alt="Quete Banner" width="100%" />
+</p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688.svg)](https://fastapi.tiangolo.com/)
-[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B.svg)](https://flutter.dev/)
-[![Gemini 1.5 Flash](https://img.shields.io/badge/AI-Gemini%201.5%20Flash-4285F4.svg)](https://ai.google.dev/)
-[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791.svg)](https://www.postgresql.org/)
-[![Redis](https://img.shields.io/badge/Cache-Redis-DC382D.svg)](https://redis.io/)
+<h1 align="center">🎮 QUETE — 8-Bit Multiplayer Bluffing Trivia</h1>
 
-> **Read this in another language:** [🇷🇺 Русский (Russian)](README.md)
+<p align="center">
+  <b>A next-gen multiplayer trivia bluffing party game with 8-bit retro aesthetic and generative AI powered by Google Gemini 1.5 Flash</b>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Gupkagrop/quete/actions"><img src="https://img.shields.io/badge/CI%2FCD-Passing-00FF41?style=for-the-badge&logo=githubactions&logoColor=black" alt="CI/CD Status" /></a>
+  <a href="docs/ROADMAP.md"><img src="https://img.shields.io/badge/Roadmap-Sprint%202%20Done-FF00FF?style=for-the-badge&logo=target&logoColor=white" alt="Sprint Progress" /></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License: MIT" /></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.12%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/FastAPI-0.115%2B-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/uv-Package%20Manager-DE5FE9?style=flat-square&logo=astral&logoColor=white" alt="uv" />
+  <img src="https://img.shields.io/badge/Flutter-3.x-02569B?style=flat-square&logo=flutter&logoColor=white" alt="Flutter" />
+  <img src="https://img.shields.io/badge/Riverpod-2.x-00B0FF?style=flat-square&logo=dart&logoColor=white" alt="Riverpod" />
+  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Redis-7-DC382D?style=flat-square&logo=redis&logoColor=white" alt="Redis" />
+  <img src="https://img.shields.io/badge/AI-Gemini%201.5%20Flash-4285F4?style=flat-square&logo=google&logoColor=white" alt="Gemini" />
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker" />
+</p>
+
+<p align="center">
+  <b>Documentation Languages:</b>
+  <br>
+  <a href="README.md">🇷🇺 Русский</a> | <b>🇬🇧 English</b>
+</p>
+
+---
+
+```text
+  ██████╗ ██╗   ██╗███████╗████████╗███████╗
+ ██╔═══██╗██║   ██║██╔════╝╚══██╔══╝██╔════╝
+ ██║   ██║██║   ██║█████╗     ██║   █████╗  
+ ██║▄▄ ██║██║   ██║██╔══╝     ██║   ██╔══╝  
+ ╚██████╔╝╚██████╔╝███████╗   ██║   ███████╗
+  ╚══▀▀═╝  ╚═════╝ ╚══════╝   ╚═╝   ╚══════╝
+```
 
 ---
 
 ## 📖 Table of Contents
-- [About Quete](#-about-quete)
-- [Core Gameplay & Bluffing Rules](#-core-gameplay--bluffing-rules)
-- [Key Features](#-key-features)
-- [Technology Stack](#-technology-stack)
-- [Architecture & Project Structure](#-architecture--project-structure)
-- [Getting Started](#-getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Backend Setup](#backend-setup)
-  - [Client Setup (Flutter)](#client-setup-flutter)
-- [Development Roadmap](#-development-roadmap)
-- [License](#-license)
+
+- [🌟 Concept & Vision](#-concept--vision)
+- [🕹️ Core Game Loop](#️-core-game-loop)
+- [⚡ Key Architectural Features](#-key-architectural-features)
+- [🏗️ System Architecture](#️-system-architecture)
+- [🛠️ Technology Stack](#️-technology-stack)
+- [🗺️ Status & Roadmap](#️-status--roadmap)
+- [🚀 Quick Start](#-quick-start)
+  - [1. Launch Database & Redis in Docker](#1-launch-database--redis-in-docker)
+  - [2. Run Backend (FastAPI + uv)](#2-run-backend-fastapi--uv)
+  - [3. Run Client (Flutter)](#3-run-client-flutter)
+  - [4. Automated Testing](#4-automated-testing)
+- [📁 Project Structure](#-project-structure)
+- [📜 License](#-license)
 
 ---
 
-## 🌟 About Quete
+## 🌟 Concept & Vision
 
-**Quete** (derived from the French *quête* — "quest") is a cross-platform real-time multiplayer trivia party game. Unlike traditional quizzes that solely measure factual recall, Quete puts **psychology, wit, and the art of deception** at center stage.
+**Quete** (derived from the French *quête* — "quest") is a cross-platform real-time multiplayer trivia party game.
 
-Powered by **Google Gemini 1.5 Flash**, Quete synthesizes unique trivia questions on-the-fly based on player-selected topics, along with the single verified truth and realistic decoy answers. Players then construct their own convincing lies to trick other players into voting for their traps.
+Unlike conventional quizzes that merely reward dry memorization of facts, **Quete** celebrates:
+* **The Art of Deception:** Every player authors a convincing lie in response to obscure trivia questions.
+* **Psychology & Deduction:** Players must distinguish genuine facts from clever decoys crafted by their friends.
+* **Generative Intelligence:** Questions and verified facts are generated on-the-fly by **Google Gemini 1.5 Flash**, guaranteeing that no two games are ever alike.
+
+The game embraces an **8-bit arcade retro style**: dark cybernetic neon palette (`#0D0D0D`, `#00FF41`, `#FF00FF`), monospace typography, pixelated box-shadow buttons, and CRT scanline aesthetics.
 
 ---
 
-## 🎮 Core Gameplay & Bluffing Rules
+## 🕹️ Core Game Loop
 
-Each round proceeds through several high-stakes phases:
+Each tournament match consists of **5 rounds** following this rigorous real-time loop:
 
+```mermaid
+flowchart TD
+    A["🎯 1. Topic Selection<br><i>(Host or rotating player)</i>"] --> B["🤖 2. Gemini AI Synthesis<br><i>(Question + Verified Truth + 7 Decoys)</i>"]
+    B --> C["✍️ 3. Bluff Phase (60 sec)<br><i>(Players craft convincing fakes)</i>"]
+    C --> D["⚡ 4. Validation & Merging<br><i>(Fuzzy check >80%, co-authorship, AFK auto-fake)</i>"]
+    D --> E["🗳️ 5. Secret Voting (30 sec)<br><i>(Spot the truth among bluffs)</i>"]
+    E --> F["🏆 6. Reveal & Scoring<br><i>(+1000 for truth, +500 for tricked opponent)</i>"]
+    F --> G{"Round < 5?"}
+    G -- Yes --> A
+    G -- No --> H["👑 Podium & Match Finished"]
 ```
-[ 🎯 Topic Selection ] 
-          │
-          ▼
-[ 🤖 AI Question & Decoy Synthesis (Gemini 1.5 Flash) ]
-          │
-          ▼
-[ ✍️ The Bluff Phase: Players craft convincing fakes ]
-          │
-          ▼
-[ 🗳️ The Vote: Truth + Player Bluffs + AI Fallbacks shuffled ]
-          │
-          ▼
-[ 🏆 Reveal & Scoring: Points for truth & fooled opponents ]
-```
 
-1. **Topic Selection:** The room host or rotating chooser picks a topic or free-form theme.
-2. **AI Question Generation:** Gemini 1.5 Flash generates a fascinating trivia question with a verified correct answer and backup decoy answers using strict **JSON Schema Structured Outputs**.
-3. **The Bluff Phase:** Every player submits a plausible, witty fake answer designed to trick opponents into believing it is the real answer.
-4. **The Vote:** All answers (the real answer, each player's bluff, and AI decoys if needed) are shuffled and presented on screen. Players cast their votes for what they believe is the actual truth.
-5. **Scoring & Podium:**
-   - **+Truth Points:** Awarded for identifying the correct answer.
-   - **+Bluff Points:** Awarded for every rival player who fell for your fake answer.
+### Scoring System:
+* 🎯 **+1000 Points:** Awarded for identifying the verified real truth.
+* 🎭 **+500 Points:** Awarded for every rival player who voted for your fake bluff.
+* 🤝 **Split Score (+500 / N):** If two or more players submit identical bluffs, the server merges them into a single option. When opponents vote for it, the authors share the points equally!
+* 🚫 **Anti-Cheat:** Voting for your own submission is strictly forbidden at the server protocol level.
 
 ---
 
-## ⚡ Key Features
+## ⚡ Key Architectural Features
 
-- **Dynamic AI Generation with Gemini 1.5 Flash:** Questions and fallbacks are created on demand, preventing repetitive questions and keeping every match fresh.
-- **Bluff Integrity & Collisions:** Submissions matching the true answer (or too similar to it) are rejected and prompted for revision. If two players coincidentally submit the same fake answer, they are merged into one voting option, and both players receive points when opponents fall for it.
-- **Auto-Fake Fallback:** If a player disconnects or lets the timer (20–120s) expire, the server automatically submits an AI-generated decoy on their behalf, maintaining uninterrupted gameplay.
-- **Multi-Tier AI & Cache System:** Frequently generated questions and categories are cached in **Redis** and **PostgreSQL** to minimize latency and optimize API costs.
-- **Friction-Free Adaptive Authentication:** Players can join rooms instantly as guests via 6-character room codes, with optional seamless upgrade to persistent accounts backed by **JWT** for profile stats and leaderboards.
-- **8-Bit Retro Aesthetic:** Vibrant arcade pixel art style, retro CRT scanline effects, custom chiptune audio, and retro avatar selections.
+- 🤖 **Gemini 1.5 Flash Structured Outputs:** Strictly typed JSON generation containing the trivia question, verified answer, and exactly 7 decoy fallbacks.
+- 🛡️ **Levenshtein Fuzzy Matching (>80%):** Real-time similarity check preventing players from spoiling the truth. If a bluff is too close to the real answer, the server requests an alternative.
+- ⚡ **Auto-Fake Fallback:** If a player disconnects or lets the timer expire, the engine instantly supplies an AI-crafted decoy. The match pace never stalls.
+- 🔄 **Mobile-First State Recovery:** Seamless reconnection on unstable mobile networks via WebSocket handshake and state snapshot query (`GET /rooms/{code}/state`).
+- 🔒 **Defense in Depth Security:**
+  - 6-digit PIN hashed via `bcrypt` with cryptographic salt.
+  - Redis Rate Limiter mitigating brute force (max 5 attempts/min, 15-minute lockout).
+  - 60-second Grace Period for JWT Refresh token rotation under mobile network drops.
+  - Bluff text remains redacted in WebSocket events until the voting phase begins.
+
+---
+
+## 🏗️ System Architecture
+
+```mermaid
+flowchart LR
+    subgraph Client["Flutter Client (Dart 3.x)"]
+        UI["8-Bit Retro UI / Screens"]
+        Notifier["Riverpod State (AsyncNotifier)"]
+        WSClient["WebSocket Client (Auto-Reconnect)"]
+        UI --> Notifier
+        Notifier --> WSClient
+    end
+
+    subgraph Backend["FastAPI Backend (Python 3.12+)"]
+        API["REST API (Auth, Rooms, State)"]
+        WSHub["WebSocket Hub (ConnectionManager)"]
+        Engine["Game Logic & State Machine"]
+        Limiter["Redis Rate Limiter & Grace Period"]
+        API --> Engine
+        WSHub --> Engine
+        API --> Limiter
+    end
+
+    subgraph DataStore["Storage & AI Infrastructure"]
+        PG[("PostgreSQL 16<br>Players, Sessions, Rounds")]
+        Redis[("Redis 7<br>Pub/Sub, Sessions, Timers")]
+        Gemini["Google Gemini 1.5 Flash<br>JSON Schema Generation"]
+    end
+
+    WSClient <-->|WSS Events| WSHub
+    Notifier <-->|HTTPS REST| API
+    Engine <-->|SQLModel / Alembic| PG
+    Engine <-->|Pub/Sub & Caching| Redis
+    Engine <-->|Async API Client| Gemini
+```
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Layer | Technology | Purpose & Highlights |
+| Layer | Technology | Details & Purpose |
 | :--- | :--- | :--- |
-| **Backend** | **Python 3.12+**, **FastAPI** | Async REST API & high-concurrency WebSocket game engine. |
-| **Real-time Engine** | **WebSockets** | Low-latency state synchronization between server and players. |
+| **Backend** | **Python 3.12+**, **FastAPI** | High-performance async REST & WebSocket web server with Pydantic v2. |
+| **Package Manager** | **uv (Astral)** | Blazing-fast virtual environment and package manager. |
+| **Database** | **PostgreSQL 16**, **SQLModel** | Unified schema models bridging SQLAlchemy 2.0 and Pydantic with **Alembic** migrations. |
+| **Cache & Pub/Sub** | **Redis 7** | Fast session state, atomic round timers, and room event broadcasting (`room:{code}:channel`). |
 | **Artificial Intelligence** | **Google Gemini 1.5 Flash** | Dynamic trivia synthesis via strict JSON Schema Structured Outputs. |
-| **Database & ORM** | **PostgreSQL**, **SQLModel** | Modern relational data modeling combining SQLAlchemy 2.0 and Pydantic v2. |
-| **Cache & State Store** | **Redis** | Ephemeral room sessions, game timers, and AI response caching. |
-| **Client Application** | **Flutter (Dart 3.x)** | Cross-platform UI for **Web**, **Android**, **iOS**, and **Desktop** (Windows, macOS, Linux). |
-| **Security & Auth** | **Self-hosted JWT**, Argon2 / bcrypt | Stateless authentication, guest sessions, and secure account upgrades. |
+| **Client Application** | **Flutter 3.x (Dart 3)** | Unified cross-platform codebase: **Web, Android, iOS, Windows, macOS, Linux**. |
+| **Client Architecture** | **Riverpod 2.x**, **go_router** | Reactive state (`AsyncNotifierProvider`), declarative routing with `AuthGuard`. |
+| **UI & Styling** | **8-Bit Retro / Pixel Art** | Monospace typography, hard pixel borders, `#0D0D0D`, `#00FF41`, `#FF00FF` palette. |
+| **Testing** | **pytest-asyncio**, **flutter test** | 100% test coverage for critical modules, isolated in-memory test suites (`FakeRedis`, `aiosqlite`). |
 
 ---
 
-## 📁 Architecture & Project Structure
+## 🗺️ Status & Roadmap
 
+Quete is built following a strict 10-sprint plan (70 days). See **[docs/ROADMAP.md](docs/ROADMAP.md)** for details.
+
+```text
+[████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 20% Completed
 ```
-quete/
-├── backend/                  # FastAPI backend service
-│   ├── app/
-│   │   ├── api/              # REST routes (auth, rooms, users)
-│   │   ├── core/             # Configuration, database setup, security
-│   │   ├── models/           # SQLModel database models & Pydantic schemas
-│   │   ├── services/         # Game engine, AI service (Gemini), Redis room manager
-│   │   └── websockets/       # WebSocket handlers & real-time protocol
-│   ├── pyproject.toml        # Poetry / pip dependency configuration
-│   └── tests/                # Pytest unit & integration tests
-│
-├── client/                   # Flutter cross-platform client
-│   ├── lib/
-│   │   ├── core/             # Theme (retro/pixel), constants, network clients
-│   │   ├── models/           # Dart data models & serialization
-│   │   ├── providers/        # State management (Riverpod / Bloc)
-│   │   ├── screens/          # UI views (Lobby, Bluff, Vote, Scoreboard)
-│   │   └── widgets/          # Reusable 8-bit UI components
-│   └── pubspec.yaml          # Flutter dependencies & assets
-│
-├── docs/                     # Specifications, architecture, and ROADMAP.md
-├── .env.example              # Sample environment variables
-└── README.md                 # Project documentation (Russian / English)
-```
+
+- [x] **Sprint 1: Foundation & DevOps** *(Days 1–7)*
+  - Monorepo structure, Docker Compose (Postgres 16, Redis 7).
+  - FastAPI skeleton & Flutter client skeleton.
+  - GitHub Actions CI/CD with automated test runs.
+- [x] **Sprint 2: Auth & Sessions** *(Days 8–14)*
+  - Guest authentication, 6-digit PIN with `bcrypt`, JWT tokens (Access + Refresh).
+  - Redis Rate Limiter (HTTP 429), token rotation with 60s Grace Period.
+  - 8-bit Flutter design system, authentication UI, and main menu.
+- [ ] **Sprint 3: Lobby & WebSockets** *(Days 15–21)* — 🔄 *IN PROGRESS*
+  - 4-character room codes, host assignment, host migration on disconnect.
+  - WebSocket Hub with Redis Pub/Sub broadcast, `auth` handshake, Zombie Room cleaner.
+  - 8-bit lobby UI in Flutter with player roster and start button.
+- [ ] **Sprint 4: Google Gemini 1.5 Flash Integration** *(Days 22–28)*
+- [ ] **Sprint 5: Core Game Loop — Topic Selection & Round** *(Days 29–35)*
+- [ ] **Sprint 6: Bluff Phase & Submission Validation** *(Days 36–42)*
+- [ ] **Sprint 7: Voting Phase, Auto-Fallback & Merging** *(Days 43–49)*
+- [ ] **Sprint 8: Full Tournament Match & Scoreboard** *(Days 50–56)*
+- [ ] **Sprint 9: Audio Engine, Pixel Art & Visual Polish** *(Days 57–63)*
+- [ ] **Sprint 10: Production Release, E2E & Deployment** *(Days 64–70)*
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
-
-- **Python 3.12+**
-- **Flutter SDK 3.x+**
-- **PostgreSQL 15+**
-- **Redis 7+**
-- **Google Gemini API Key** ([Google AI Studio](https://aistudio.google.com/))
+* **Python 3.12+** and **[uv](https://docs.astral.sh/uv/)**
+* **Flutter SDK 3.x+**
+* **Docker & Docker Compose**
 
 ---
 
-### Backend Setup
+### 1. Launch Database & Redis in Docker
 
-1. **Navigate to the backend directory:**
-   ```bash
-   cd backend
-   ```
-
-2. **Create and activate a virtual environment:**
-   ```bash
-   python -m venv .venv
-   # Windows (PowerShell):
-   .venv\Scripts\Activate.ps1
-   # Linux / macOS:
-   source .venv/bin/activate
-   ```
-
-3. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   # Or using poetry / uv if preferred
-   ```
-
-4. **Configure environment variables:**
-   ```bash
-   cp ../.env.example .env
-   ```
-   Fill in your `GEMINI_API_KEY`, `DATABASE_URL`, and `REDIS_URL`.
-
-5. **Run the backend development server:**
-   ```bash
-   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-   ```
+In the root directory:
+```bash
+docker compose up -d
+```
+> Starts PostgreSQL 16 (port 5432) and Redis 7 (port 6379).
 
 ---
 
-### Client Setup (Flutter)
+### 2. Run Backend (FastAPI + uv)
 
-1. **Navigate to the client directory:**
-   ```bash
-   cd client
-   ```
+```bash
+cd backend
 
-2. **Install Flutter packages:**
-   ```bash
-   flutter pub get
-   ```
+# Setup environment variables
+cp ../.env.example .env
 
-3. **Run client on desired target:**
-   ```bash
-   # Run in Chrome / Web:
-   flutter run -d chrome
+# Sync dependencies using uv
+uv sync
 
-   # Run on Windows Desktop:
-   flutter run -d windows
+# Run database migrations
+uv run alembic upgrade head
 
-   # Run on connected Mobile device:
-   flutter run
-   ```
+# Start development server with auto-reload
+uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+> Interactive Swagger UI will be available at: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
-## 🗺️ Development Roadmap
+### 3. Run Client (Flutter)
 
-Check out the comprehensive **[70-Day Development Roadmap](docs/ROADMAP.md)**:
+```bash
+cd client
 
-- 🏗️ **Phase 1: Foundation & DevOps (Days 1–7)** — Repository setup, CI/CD, base containers, config.
-- ⚙️ **Phase 2: Core Game Engine & WebSockets (Days 8–21)** — Room lifecycle, state machine, real-time events.
-- 🧠 **Phase 3: AI Integration & Game Loop (Days 22–35)** — Gemini 1.5 Flash structured generation, caching, fallback decoys.
-- 📱 **Phase 4: Flutter Client - Core UX (Days 36–49)** — Responsive layout, lobby UI, bluff input, voting mechanics.
-- ✨ **Phase 5: Polish & Retro UI (Days 50–60)** — Pixel art aesthetics, scanlines, chiptune sound effects, animations.
-- 🚀 **Phase 6: Multi-platform & Production (Days 61–70)** — Cross-platform builds, stress testing, production deployment.
+# Fetch Flutter dependencies
+flutter pub get
+
+# Launch in Chrome (Web)
+flutter run -d chrome
+
+# Or launch on Windows Desktop
+flutter run -d windows
+```
+
+---
+
+### 4. Automated Testing
+
+#### Backend tests (pytest + ruff):
+```bash
+cd backend
+uv run ruff check .
+uv run pytest
+```
+
+#### Client tests (flutter test + analyze):
+```bash
+cd client
+flutter analyze
+flutter test
+```
+
+---
+
+## 📁 Project Structure
+
+```text
+quete/
+├── .github/workflows/        # GitHub Actions CI/CD pipelines
+├── backend/                  # FastAPI backend service
+│   ├── alembic/              # Database migrations
+│   ├── app/
+│   │   ├── api/              # REST endpoints (auth, rooms, state)
+│   │   ├── core/             # Configuration, security (JWT/PIN), DB
+│   │   ├── models/           # SQLModel models (Player, Room, Session, Round)
+│   │   ├── schemas/          # Pydantic validation schemas
+│   │   ├── services/         # Session, room, and Gemini API services
+│   │   └── websockets/       # WebSocket hub & Redis Pub/Sub manager
+│   ├── tests/                # Pytest unit & integration tests
+│   └── pyproject.toml        # uv dependencies & project configuration
+├── client/                   # Flutter cross-platform client
+│   ├── lib/
+│   │   ├── core/             # 8-bit retro theme, router, token storage
+│   │   ├── models/           # Dart data models
+│   │   ├── state/            # Riverpod providers (Auth, Lobby, Game)
+│   │   └── ui/
+│   │       ├── screens/      # Screens (Auth, Menu, Lobby, Bluff, Vote)
+│   │       └── widgets/      # Pixel-styled buttons and UI elements
+│   ├── test/                 # Component and unit tests
+│   └── pubspec.yaml          # Flutter dependencies
+├── docs/                     # Architecture specifications & sprint plans
+│   ├── assets/               # Promotional graphics and banners
+│   ├── architecture/         # Specifications (api.md, database.md, frontend.md)
+│   └── ROADMAP.md            # 70-day master development plan
+└── docker-compose.yml        # PostgreSQL 16 + Redis 7 services
+```
 
 ---
 
 ## 📜 License
 
-This project is licensed under the **MIT License**.
-Distributed freely for study, personal gameplay, and community enhancement.
+Distributed under the **MIT License**.
+Crafted with ❤️ for lovers of retro arcade games and clever deception.
