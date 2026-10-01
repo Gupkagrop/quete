@@ -3,6 +3,8 @@
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
+from app.api.auth import router as auth_router
+
 
 class HealthResponse(BaseModel):
     """Схема ответа для эндпоинта проверки работоспособности сервиса."""
@@ -15,6 +17,9 @@ app: FastAPI = FastAPI(
     description="Backend API для многопользовательской викторины Quete",
     version="0.1.0",
 )
+
+# Подключение роутеров API
+app.include_router(auth_router)
 
 
 @app.get(
