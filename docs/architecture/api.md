@@ -1,7 +1,7 @@
 # API Architecture — Quete
 
 > [!NOTE]
-> Контракты REST-эндпоинтов, WebSocket-протокол и политики безопасности проекта Quete.
+> Контракты REST-эндпоинтов, полный WebSocket-протокол (Client<->Server) и политики безопасности проекта Quete.
 > Актуализировано по результатам Adversarial Architecture Review (Спринт 1–10).
 
 ## Base URL
@@ -43,15 +43,12 @@ https://api.quete.app  # production
   "pin_code": "123456" 
 }
 ```
-*Правила валидации:*
-- `nickname`: regex `^[a-zA-Z0-9_-]{2,20}$` (санитария от XSS и управляющих символов).
-- `pin_code`: строка ровно из 6 цифр `^[0-9]{6}$` (опционально при первой регистрации; обязателен для повторного входа).
+*Валидация:*
+- `nickname`: regex `^[a-zA-Z0-9_-]{2,20}$`.
+- `pin_code`: строка из 6 цифр `^[0-9]{6}$` (опционально при первой регистрации).
+- *Rate Limiting:* максимум 5 попыток ввода PIN в минуту на пару (IP, nickname), временная блокировка на 15 минут (429 Too Many Requests).
 
-*Rate Limiting:*
-- Ограничение: максимум 5 попыток ввода PIN в минуту на IP и nickname.
-- Блокировка на 15 минут при превышении лимита (HTTP 429 Too Many Requests).
-
-**Response 200 (Success):**
+**Response 200:**
 ```json
 {
   "access_token": "eyJhbGciOi...",
@@ -72,7 +69,6 @@ https://api.quete.app  # production
   "refresh_token": "a1b2c3d4-e5f6-..."
 }
 ```
-*Grace Period (30–60 сек):* Позволяет обработать параллельные/повторные запросы с мобильных устройств при потере пакетов без ложного разлогина.
 
 ---
 
@@ -91,17 +87,24 @@ https://api.quete.app  # production
 {
   "room_code": "GAME",
   "status": "in_progress",
+  "session_id": "8f3b6c2a-9e12-4f1a-b32c-123456789abc",
   "current_round": 2,
   "total_rounds": 5,
-  "phase": "BLUFF_SUBMISSION",
+  "phase": "VOTING",
   "phase_ends_at": "2026-10-01T12:00:45Z",
   "server_time": "2026-10-01T12:00:10Z",
   "question": {
     "text": "Какое необычное блюдо подавали на пирах в Древнем Риме?"
   },
+  "voting_options": [
+    {"id": "c1a2b3d4-0001-...", "text": "Фламинго в меду"},
+    {"id": "c1a2b3d4-0002-...", "text": "Жареные мыши"}
+  ],
   "player_status": {
     "has_submitted": true,
-    "has_voted": false
+    "has_voted": false,
+    "is_host": false,
+    "score": 1000
   },
   "players": [
     {"id": "...", "nickname": "Player1", "score": 1000, "is_host": true, "online": true}
@@ -111,16 +114,16 @@ https://api.quete.app  # production
 
 ---
 
-## 2. WebSocket Protocol & Handshake
+## 2. WebSocket Protocol (Двусторонний контракт)
 
 > [!CAUTION]
 > **Передача JWT в URL-параметрах (`?token=...`) строго запрещена!**
 > Токены в query-параметрах логируются веб-серверами, прокси и балансировщиками.
 
 ### 2.1 Подключение и Handshake
-**URL:** `ws://localhost:8000/ws/{room_code}` (без query-параметров авторизации).
+**URL:** `ws://localhost:8000/ws/{room_code}` (чистый URL).
 
-Сразу после открытия соединения клиент **обязан** в течение 5 секунд отправить аутентификационный payload:
+Сразу после открытия соединения клиент **обязан** отправить аутентификационный payload:
 ```json
 {
   "type": "auth",
@@ -130,7 +133,7 @@ https://api.quete.app  # production
 }
 ```
 
-- Если токен валиден, сервер отвечает:
+- При успешной проверке сервер отвечает:
   ```json
   {
     "type": "auth_ok",
@@ -140,46 +143,92 @@ https://api.quete.app  # production
     }
   }
   ```
-- Если токен невалиден или истёк, сокет закрывается с кодом `4001 (Unauthorized)`.
+- При ошибке сокет закрывается с кодом `4001 (Unauthorized)`.
 
-### 2.2 Архитектура рассылки (Redis Pub/Sub)
-Для поддержки нескольких Uvicorn-воркеров и масштабируемости:
-1. Сервер подписан на канал Redis `room:{room_code}:channel`.
-2. Любое сообщение для комнаты публикуется в Redis Pub/Sub и доставляется клиентам на всех воркерах.
+---
 
-### 2.3 Envelope Формат
-Все сообщения между клиентом и сервером используют строгий JSON-контракт:
+### 2.2 Client -> Server События (Мутации)
+
+Все исходящие сообщения от клиента используют единый Envelope-формат `{"type": str, "payload": dict}`.
+
+#### 1. Выбор темы игры (хост)
 ```json
 {
-  "type": "<event_type>",
+  "type": "select_topic",
+  "payload": {
+    "topic": "История Древнего Рима"
+  }
+}
+```
+
+#### 2. Старт игры (хост)
+```json
+{
+  "type": "start_game",
   "payload": {}
 }
 ```
 
-### 2.4 Спецификация событий
-| Type | Направление | Описание | Защита от читерства / правила |
-|---|---|---|---|
-| `auth` | Client->Server | Передача JWT при подключении | Обязателен первым сообщением |
-| `auth_ok` | Server->Client | Успешная аутентификация сокета | Подтверждение подключения |
-| `player_joined` | Server->Client | Новый игрок вошёл в комнату | Список участников обновляется |
-| `player_left` | Server->Client | Игрок отключился | При уходе хоста хост передаётся |
-| `host_transferred`| Server->Client | Смена хоста | Передача прав старейшему игроку |
-| `topic_selected` | Server->Client | Выбрана тема игры | Инициируется только хостом |
-| `game_started` | Server->Client | Старт матча | Переход в `QUESTION_READING` |
-| `phase_started` | Server->Client | Старт новой фазы с `ends_at` | Клиенты синхронизируют таймер |
-| `player_submitted`| Server->Client | Игрок ввёл ложный ответ | **Payload содержит ТОЛЬКО `player_id`** (текст ответа не раскрывается!) |
-| `start_voting` | Server->Client | Варианты для голосования | Варианты перемешаны, авторы скрыты |
-| `round_results` | Server->Client | Итоги раунда, раскрытие карт | Авторы, голоса, дельта очков |
-| `ping` / `pong` | Двустороннее | Heartbeat каждые 15 сек | Обновляет `online:{player_id}` |
+#### 3. Отправка блефа (игрок)
+```json
+{
+  "type": "submit_bluff",
+  "payload": {
+    "answer_text": "Павлиньи языки"
+  }
+}
+```
+
+#### 4. Голосование за вариант (игрок)
+```json
+{
+  "type": "submit_vote",
+  "payload": {
+    "option_id": "c1a2b3d4-0001-4f1a-b32c-123456789abc"
+  }
+}
+```
+
+#### 5. Перезапуск матча / Реванш (хост)
+```json
+{
+  "type": "rematch",
+  "payload": {}
+}
+```
+
+#### 6. Сервисный Heartbeat Ping
+```json
+{
+  "type": "ping",
+  "payload": {}
+}
+```
 
 ---
 
-## 3. Обработка ошибок (Error Responses)
-Формат ошибок REST API:
-```json
-{
-  "detail": "Описание ошибки",
-  "code": "ERROR_CODE"
-}
-```
-Коды: `400` (Validation), `401` (Unauthorized), `403` (Forbidden/Host only), `404` (Not Found), `429` (Rate Limited), `500` (Internal Error).
+### 2.3 Server -> Client События (Широковещательные и сервисные)
+
+| Type | Описание | Payload структура |
+|---|---|---|
+| `auth_ok` | Подтверждение авторизации сокета | `{"player_id": UUID, "nickname": str}` |
+| `player_joined` | Новый игрок вошёл в комнату | `{"player": {"id": UUID, "nickname": str, "is_host": bool, "score": int}}` |
+| `player_left` | Игрок отключился | `{"player_id": UUID}` |
+| `host_transferred` | Смена хоста лобби | `{"new_host_id": UUID}` |
+| `topic_selected` | Выбрана тема игры | `{"topic": str, "is_custom": bool}` |
+| `phase_started` | Старт новой фазы раунда | `{"phase": str, "round_number": int, "ends_at": str, "duration_seconds": int, "question": {"text": str}}` |
+| `player_submitted` | Игрок ввёл ложный ответ (текст скрыт!) | `{"player_id": UUID}` |
+| `start_voting` | Старт фазы голосования | `{"options": [{"id": UUID, "text": str}], "ends_at": str, "duration_seconds": 30}` |
+| `round_results` | Итоги раунда с раскрытием авторов | `{"correct_option_id": UUID, "breakdown": [...], "scores": [{"player_id": UUID, "score": int, "round_delta": int}]}` |
+| `game_finished` | Завершение 5 раундов и итоговый пьедестал | `{"podium": [{"place": 1, "nickname": str, "score": int}, ...]}` |
+| `error` | Ошибка валидации действия клиента | `{"code": str, "detail": str}` |
+| `pong` | Ответ на Heartbeat Ping | `{}` |
+
+---
+
+## 3. Обработка ошибок (Error Codes)
+- `BLUFF_MATCHES_TRUTH`: Введённый ответ совпадает с правдой или слишком близок к ней (Fuzzy Matching >80%).
+- `CANNOT_VOTE_OWN_BLUFF`: Попытка проголосовать за свой собственный блеф (или объединённый ответ, где игрок соавтор).
+- `ALREADY_VOTED`: Попытка проголосовать повторно в рамках одного раунда.
+- `NOT_HOST`: Попытка не-хоста запустить игру, выбрать тему или начать реванш.
+- `RATE_LIMIT_EXCEEDED`: Превышение частоты запросов к API.

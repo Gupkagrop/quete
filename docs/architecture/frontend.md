@@ -2,7 +2,7 @@
 
 > [!NOTE]
 > Дизайн-система, роутинг, управление состоянием и протокол работы WebSocket-клиента Flutter.
-> Актуализировано по результатам Adversarial Architecture Review (Спринт 1–10).
+> Актуализировано по результатам финального аудита (Спринт 1–10).
 
 ## Платформы
 - **Web** (основной деплой, Mobile-First, вертикальная ориентация)
@@ -26,7 +26,7 @@
 client/lib/
 ├── core/
 │   ├── network/      # HTTP-клиент, REST API вызовы, обработка 429 Rate Limit
-│   ├── websocket/    # WebSocket-сервис, auth handshake, reconnect логика
+│   ├── websocket/    # WebSocketService: отправка событий, reconnect логика
 │   ├── storage/      # TokenStorage (access_token, refresh_token, player_id)
 │   └── theme/        # Ретро 8-bit тема, пиксельные шрифты, цвета
 ├── models/           # Dart Data Models (PlayerProfile, RoomState, GameState, etc.)
@@ -36,8 +36,8 @@ client/lib/
     │   ├── auth/     # Экран гостевой авторизации (Спринт 2)
     │   ├── menu/     # Главное меню (Создать / Войти)
     │   ├── lobby/    # Лобби комнаты и выбор темы (Спринты 3–4)
-    │   ├── game/     # Игровой цикл: вопрос, блеф, голосование (Спринты 5–8)
-    │   └── result/   # Итоги раунда и пьедестал победителей (Спринт 8)
+    │   ├── game/     # Игровой цикл: контейнер фаз матча (Спринты 5–8)
+    │   └── result/   # Итоговая таблица лидеров и пьедестал (Спринт 8)
     └── widgets/      # Ретро-виджеты (RetroButton, PixelTimer, ReconnectBanner)
 ```
 
@@ -52,38 +52,38 @@ client/lib/
   | `/auth` | `AuthScreen` | Ввод ника, опциональный PIN-код, показ выданного PIN |
   | `/` | `MainMenuScreen` | Создать комнату или войти по коду |
   | `/lobby/:code` | `LobbyScreen` | Ожидание игроков, передача хоста, выбор темы |
-  | `/game/:code` | `GameScreen` | Контейнер фаз матча (вопрос, блеф, голосование) |
-  | `/result/:code` | `ResultScreen` | Итоговая таблица лидеров |
+  | `/game/:code` | `GameContainerScreen` | Единый контейнер смены фаз (вопрос, блеф, голосование, результаты) |
+  | `/result/:code` | `LeaderboardScreen` | Итоговый пьедестал лидеров |
 
 ---
 
-## 3. Правила работы WebSocket-клиента и State Recovery
+## 3. WebSocket клиент и протокол обмена событиями
 
-1. **Безопасное подключение:** Сокет подключается по чистому URL `ws://<host>/ws/{room_code}` без токена в параметрах.
-2. **Auth Handshake:** Сразу после открытия соединения клиент отправляет:
-   ```json
-   {
-     "type": "auth",
-     "payload": {"token": "<access_token>"}
-   }
-   ```
-3. **Resilience & Exponential Backoff:**
-   - При обрыве соединения (смена Wi-Fi ↔ LTE, звонок): повторы с задержкой 1с $\rightarrow$ 2с $\rightarrow$ 4с $\rightarrow$ 8с $\rightarrow$ max 30с.
-   - Во время реконнекта отображается виджет `ReconnectBanner`.
-4. **State Recovery (Защита от потери пакетов):**
-   - **Строгое правило:** Сразу после успешного реконнекта сокета клиент выполняет REST-запрос `GET /rooms/{code}/state`.
-   - Полученный полный снимок игры записывается в `gameProvider`, экран переключается на актуальную фазу, и только затем клиент начинает принимать инкрементальные WS-события.
+### 3.1 Handshake и безопасность
+1. Подключение: `ws://<host>/ws/{room_code}` (чистый URL).
+2. Первое сообщение клиента: `{"type": "auth", "payload": {"token": "<access_token>"}}`.
+
+### 3.2 Отправка клиентских действий (Client -> Server)
+Через метод `WebSocketService.send(type, payload)`:
+- `select_topic`: `{"topic": "..."}`
+- `start_game`: `{}`
+- `submit_bluff`: `{"answer_text": "..."}`
+- `submit_vote`: `{"option_id": "..."}`
+- `rematch`: `{}`
+- `ping`: `{}`
+
+### 3.3 State Recovery (Защита от потери пакетов)
+- При разрыве соединения: exponential backoff (1s $\rightarrow$ 2s $\rightarrow$ 4s $\rightarrow$ max 30s) и показ `ReconnectBanner`.
+- **Сразу после восстановления сокета:**
+  1. Вызов `GET /rooms/{code}/state`.
+  2. Запись снимка игры в `gameProvider` (фаза, таймер, список `voting_options`, статус ответа).
+  3. UI синхронизируется на нужную фазу, после чего включается приём инкрементальных событий.
 
 ---
 
 ## 4. Дизайн-система (8-bit Retro)
 
-- **Палитра:**
-  - Background: `#0D0D0D` (глубокий чёрный)
-  - Surface/Card: `#1A1A1A`
-  - Neon Green (Primary): `#00FF41`
-  - Neon Magenta (Accent): `#FF00FF`
-  - Danger/Warning: `#FF3131`
-- **Геометрия:** `BorderRadius.zero`, акцентированные рамки 2–3px с псевдо-тенями.
-- **Типографика:** Моноширинные пиксельные шрифты с контрастными заголовками.
-- **Клиентская валидация никнейма:** Regex `^[a-zA-Z0-9_-]{2,20}$`.
+- **Палитра:** `#0D0D0D` (фон), `#1A1A1A` (карточки), `#00FF41` (зеленый неон), `#FF00FF` (магента неон), `#FF3131` (ошибка).
+- **Геометрия:** `BorderRadius.zero`, резкие пиксельные тени и контрастные рамки 2–3px.
+- **Типографика:** Моноширинный пиксельный шрифт.
+- **Валидация на клиенте:** никнейм `^[a-zA-Z0-9_-]{2,20}$`, блеф 1–80 символов.
